@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+    <title>Graph Algo</title>
+    <head>
+        <link rel = "stylesheet" type="text/css" href = "style.css">
+        <script src="https://kit.fontawesome.com/6727f5493e.js" crossorigin="anonymous"></script>
+        <script src = "node.js" type="application/javascript" defer></script>
+        <script src = "pointer.js" type="application/javascript" defer></script>
+        <script src = "graph.js" type="application/javascript" defer></script>
+        <script src = "misc.js" type="application/javascript" defer></script>
+        <script src = "main.js" type="application/javascript" defer></script>
+    </head>
+    <body>
+            <div id = "toolbar">
+                <!-- There should only be one svg-->
+                
+                <!--this will contain the navbar that will always be on top it will be position sticky-->
+                <button id = "addNode" class = "genericBtn">
+                    <div class = "fas fa-plus"></div>
+                    <div>Add</div>
+                </button>
+                <button id = "removeNode" class = "genericBtn">
+                    <div class = "fas fa-ban"></div>
+                    <div>remove</div>
+                </button>
+                <button id = "randomNode" class = "genericBtn">
+                    <div class = "fas fa-dice"></div>
+                    <div>random</div>
+                </button>
+            </div>
+            <svg id = "canvas">
+                <!-- this will be entirely done in javascript-->
+            </svg>
+    </body>
+    
+</html>
