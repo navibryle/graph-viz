@@ -22,27 +22,33 @@ class Pointer{
         this._state = "erase"
         /*this._canvas.style["cursor"] = "none"*/
         //======parameters to be passed to event listener====
-        this._canvas.initX = null
-        this._canvas.initY = null
-        this._canvas.count = 0
-        this._canvas.cursor = this._eraserCursor
+        let initX = null
+        let initY = null
+        let count = 0
+        let cursor = this._eraserCursor
         //======parameters to be passed to event listener====
-        this._canvas.addEventListener("mousemove",this.eraseEvent)
-    }
-    eraseEvent(event){
-        let cursor = event.target.cursor
-        if (event.count === 0 || event.initX === null || event.initY === null){
-            cursor.style["opacity"] = 1
-            event.target.initX = event.clientX
-            event.target.initY = event.clientY
-            cursor.style["top"] = initY
-            cursor.style["left"] = initX
-            count += 1
-        }else{
-            requestAnimationFrame(function(){
-                cursor.style.transform = `translate(${event.clientX-event.target.initX}px,${event.clientY-event.target.initY+12}px)`//+12 to place the image on top of the cursor
-            })
+        let xCoord = 0;
+        let yCoord = 0;
+        this._canvas.addEventListener("mousemove",function(event){
+            if (count === 0){
+                initX = event.clientX
+                initY = event.clientY
+                cursor.style["top"] = `${initY}px`
+                cursor.style["left"] = `${initX}px`
+                cursor.style["opacity"] = "1"
+                count +=1
+                xCoord = initX
+                yCoord = initY
+            }else{
+                xCoord = event.clientX
+                yCoord = event.clientY
+            }
+        })
+        const eraseEvent = () =>{
+            this._eraserCursor.style.transform = `translate(${xCoord-initX}px,${yCoord-initY-15}px)`//+12 to place the image on top of the cursor
+            requestAnimationFrame(eraseEvent)
         }
+        requestAnimationFrame(eraseEvent)
     }
     setDefaultState(){
         this.removeEraseEventListener()
