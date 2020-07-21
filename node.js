@@ -6,6 +6,7 @@ class Node{
         this._cx = x
         this._cy = y
         this._fill = "black"
+        this._node = document.createElementNS("http://www.w3.org/2000/svg","circle")
     }
     getId(){
         return this._id   
@@ -50,13 +51,23 @@ class Node{
             console.error(`invalid fill for node with id ${this._id}`)
         }
     }
-    getNode(){
-        var node = document.createElementNS("http://www.w3.org/2000/svg","circle")
-        node.setAttribute("r",this._radius)
-        node.setAttribute("cx",this._cx)
-        node.setAttribute("cy",this._cy)
-        node.setAttribute("fill",this._fill)
-        return node
+    nodeEventListenerPointer(pointer){
+        var node = this._node
+        this._node.addEventListener("click",function(e){
+            console.log(node)
+            switch(pointer.getState()){
+                case "erase":
+                    document.getElementById("canvas").removeChild(node)
+            }
+        })
+    }
+    getNode(){ 
+        this._node.setAttribute("r",this._radius)
+        this._node.setAttribute("cx",this._cx)
+        this._node.setAttribute("cy",this._cy)
+        this._node.setAttribute("fill",this._fill)
+        this._node.id = `${this._id}`
+        return this._node
     }
     
 }

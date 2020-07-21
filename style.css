@@ -12,12 +12,15 @@ body{
     right:0;
     margin: 0;
     padding:0;
-    display: flex;
-    flex-direction: column;
+    
 }
 #main-wrapper{
+    position: relative;
     height: 100%;
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 /*==========main wrapper=======*/
 /*==========tool bar==========*/
@@ -41,6 +44,15 @@ body{
 }
 /*==========buttons end=====*/
 /*==========canvas =========*/
-svg{
+#canvas{
+    position: relative;
     flex-grow: 1;
+}
+#erase-cursor{
+    position: absolute;
+    left: 0;
+    top: -30px;
+    /*cursor: none;*/
+    opacity: 1;
+    backface-visibility: hidden;
 }
