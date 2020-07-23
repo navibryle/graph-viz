@@ -52,7 +52,8 @@ body{
     position: fixed;
     left: 0;
     top: -30px;
-    cursor: none;
     opacity: 1;
     backface-visibility: hidden;
+    cursor: none;
+    pointer-events: none;
 }

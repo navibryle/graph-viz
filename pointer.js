@@ -1,15 +1,17 @@
 class Pointer{
-    constructor(nodeSvg,eraseSvg,canvasId,eraserCursorId){
+    constructor(nodeSvg,eraseSvg,canvasId,eraserCursorId,toolbarId){
         this._state = "default"
         this._nodeSvg = nodeSvg
         this._eraseSvg = eraseSvg
         this._canvas = document.getElementById(canvasId)
         this._eraserCursor = document.getElementById(eraserCursorId)
-
+        this._toolbar = document.getElementById(toolbarId)
     }
     removeEraseEventListener(){
         //cursor id is the id of the dome node that is acting as the cursor
-        this._canvas.removeEventListener("mousemove",this.adjustCursor)
+        this._canvas.removeEventListener("mousemove",this.canvasEraseCursor)
+        this._eraserCursor.removeEventListener("mousemove",this.canvasEraseCursor)
+        this._toolbar.removeEventListener("mousemove",this.toolbarEraseCursor)
         this._eraserCursor.style["left"] = "-200px"
     }
     setNodeState(){
@@ -20,40 +22,52 @@ class Pointer{
     setEraseState(){
         //cursor id is the id of the dome node that is acting as the cursor
         this._state = "erase"
-        /*this._canvas.style["cursor"] = "none"*/
-        let xCoord = null
-        let yCoord = null
-        let initX = null
-        let initY = null
         //======parameters to be passed to event listener====
-        this._canvas.initX = initX
-        this._canvas.initY = initY
+        this._canvas.initX = null
+        this._canvas.initY = null
         this._canvas.count = 0
         this._canvas.cursor = this._eraserCursor
         this._canvas.style["cursor"] = "none"
-        this._canvas.xCoord = xCoord;
-        this._canvas.yCoord = yCoord;
+        this._canvas.xCoord = null
+        this._canvas.yCoord = null
         this._canvas.src = this
         this._eraserCursor.src = this
+        this._toolbar.src = this
         //======parameters to be passed to event listener====
         this._canvas.addEventListener("mousemove",this.canvasEraseCursor)
         this._eraserCursor.addEventListener("mousemove",this.canvasEraseCursor)
-        //this._eraserCursor.addEventListener("mousemove",this.adjustCursor)
+        this._toolbar.addEventListener("mousemove",this.toobarEraseCursor)
+        //==============loop to make sure the cursor updates as soon as possible==============
         const eraseEvent = () =>{
-            this._eraserCursor.style.transform = `translate(${this._canvas.xCoord-this._canvas.initX}px,${this._canvas.yCoord-this._canvas.initY-15}px)`//+12 to place the image on top of the cursor
+            this._eraserCursor.style.transform = `translate(${this._canvas.xCoord-this._canvas.initX-5}px,
+                ${this._canvas.yCoord-this._canvas.initY-25}px)`//the constants are there to make sure the pointer is offset under the eraserCurosr
             requestAnimationFrame(eraseEvent)
         }
         requestAnimationFrame(eraseEvent)
+        //====================================================================================
     }
-   canvasEraseCursor(event){
+    toobarEraseCursor(event){
+        //makes sure that the cursor goes back to default when in the toolbar
+        if (event.currentTarget.src._eraserCursor.style["opacity"] != "0"){
+            event.currentTarget.src._eraserCursor.style["opacity"] = "0"
+        }
+    }
+    canvasEraseCursor(event){
         let cursor = event.currentTarget === event.currentTarget.src._canvas ? event.currentTarget : event.currentTarget.src._canvas
+        //=============== makes sure that the cursor goes back to default in when in the toolbar===
+        if (cursor.count != 0 && event.clientY >= cursor.initY){
+            event.currentTarget.src._eraserCursor.style["opacity"] = "1"
+        }else{
+            event.currentTarget.src._eraserCursor.style["opacity"] = "0"
+        }
+        //==========================================================================================
         if (cursor.count === 0){
             cursor.initX = event.clientX
             cursor.initY = event.clientY
             cursor.cursor.style["top"] = `${cursor.initY}px`
             cursor.cursor.style["left"] = `${cursor.initX}px`
-            cursor.cursor.style["opacity"] = "1"
             cursor.count +=1
+            event.currentTarget.src._eraserCursor.style["opacity"] = "1"
             cursor.xCoord = cursor.initX
             cursor.yCoord = cursor.initY
         }else{
