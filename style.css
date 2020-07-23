@@ -49,10 +49,10 @@ body{
     flex-grow: 1;
 }
 #erase-cursor{
-    position: absolute;
+    position: fixed;
     left: 0;
     top: -30px;
-    /*cursor: none;*/
+    cursor: none;
     opacity: 1;
     backface-visibility: hidden;
 }
