@@ -92,4 +92,16 @@ class Pointer{
     getState(){
         return this._state
     }
+    eraseState(){
+        return "erase"
+    }
+    defaultState(){
+        return "default"
+    }
+    nodeState(){
+        return "node"
+    }
+    getToolBarHeight(){
+        return this._toolbar.getBoundingClientRect().bottom
+    }
 }

@@ -53,11 +53,42 @@ class Node{
     }
     nodeEventListenerPointer(pointer){
         var node = this._node
-        this._node.addEventListener("click",function(e){
-            console.log(node)
+        this._node.addEventListener("click",function(event){
             switch(pointer.getState()){
-                case "erase":
+                case pointer.eraseState():
                     document.getElementById("canvas").removeChild(node)
+                    break
+            }
+        })
+        this._node.addEventListener("mousedown",function(event){
+            switch(pointer.getState()){
+                case pointer.defaultState():
+                    node.style["cursor"] = "grabbing"
+            }
+        })
+        this._node.addEventListener("mouseup",function(event){
+            switch(pointer.getState()){
+                case pointer.defaultState():
+                    node.style["cursor"] = "grab"
+            }
+        })
+        this._node.addEventListener("mouseout",function(event){
+            switch(pointer.getState()){
+                case pointer.defaultState():
+                    node.style["cursor"] = "grab"
+            }
+        })
+        this.nodeEventListener(pointer)
+    }
+    nodeEventListener(pointer){
+        let node = this._node
+        let xInit = this._cx
+        let yInit = this._cy+pointer.getToolBarHeight()// "getBoundingClientRect" is used to get the toolbar height
+        node.addEventListener("mousemove",function(event){
+            if (node.style["cursor"] === "grabbing"){
+                console.log(`translate(${event.clientX-xInit}px,${event.clientY-yInit}px)`)
+                node.style.transform = `translate(${event.clientX-xInit}px,${event.clientY-yInit}px)`
+                
             }
         })
     }
@@ -66,6 +97,7 @@ class Node{
         this._node.setAttribute("cx",this._cx)
         this._node.setAttribute("cy",this._cy)
         this._node.setAttribute("fill",this._fill)
+        this._node.setAttribute("class","node")
         this._node.id = `${this._id}`
         return this._node
     }
