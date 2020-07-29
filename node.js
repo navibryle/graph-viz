@@ -64,18 +64,14 @@ class Node{
             switch(pointer.getState()){
                 case pointer.defaultState():
                     node.style["cursor"] = "grabbing"
+                    break
             }
         })
         this._node.addEventListener("mouseup",function(event){
             switch(pointer.getState()){
                 case pointer.defaultState():
                     node.style["cursor"] = "grab"
-            }
-        })
-        this._node.addEventListener("mouseout",function(event){
-            switch(pointer.getState()){
-                case pointer.defaultState():
-                    node.style["cursor"] = "grab"
+                    break
             }
         })
         this.nodeEventListener(pointer)
@@ -85,10 +81,12 @@ class Node{
         let xInit = this._cx
         let yInit = this._cy+pointer.getToolBarHeight()// "getBoundingClientRect" is used to get the toolbar height
         node.addEventListener("mousemove",function(event){
-            if (node.style["cursor"] === "grabbing"){
-                console.log(`translate(${event.clientX-xInit}px,${event.clientY-yInit}px)`)
+            if (pointer.isDefaultState() && node.style["cursor"] === "grabbing"){
                 node.style.transform = `translate(${event.clientX-xInit}px,${event.clientY-yInit}px)`
                 
+            }
+            else if (pointer.isEraseState()){
+                node.style["cursor"] = "none"
             }
         })
     }

@@ -33,7 +33,7 @@ class Pointer{
         this._canvas.src = this
         this._eraserCursor.src = this
         this._toolbar.src = this
-        //======parameters to be passed to event listener====
+        //======parameters to be passed to event listener end====
         this._canvas.addEventListener("mousemove",this.canvasEraseCursor)
         this._eraserCursor.addEventListener("mousemove",this.canvasEraseCursor)
         this._toolbar.addEventListener("mousemove",this.toobarEraseCursor)

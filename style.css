@@ -42,6 +42,10 @@ body{
 .genericBtn:active{
     background:  rgb(117, 117, 117);
 }
+.nodeBtn{
+    background: black;
+    color: white;
+}
 /*==========buttons end=====*/
 /*==========canvas =========*/
 #canvas{
