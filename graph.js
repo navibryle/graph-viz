@@ -7,7 +7,7 @@ class Graph{
         //the root will always be the first element in this list
         this._canvas = null
         this.checkCanvasId(canvasId)//will check if the canvas id is correct
-        
+        this._selected = null
     }
     addNode(node){
         //this will add node to the canvas
@@ -15,6 +15,20 @@ class Graph{
         this._size += 1
         this._nodes.push(node)
         this._canvas.appendChild(node)
+    }
+    clickedNode(node){
+        if (this._selected === null){
+            this._selected = node
+        }else if (this._selected != node && this._selected != null){
+            this._selected.updateState()
+            this._selected = node
+        }else{
+            //this will happen when this._selected === node
+            this._selected = null
+        }
+    }
+    isSelected(){
+        return this._selected
     }
     checkCanvasId(canvasId){
         try{

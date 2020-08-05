@@ -33,7 +33,7 @@ function canvasNodeEventListener(pointer,id,graph){
                 let toolbarHeight = canvas.getBoundingClientRect().top
                 let xCoord = event.clientX+16//16 is to account for the offset of the pointer
                 let yCoord = event.clientY - toolbarHeight+16//16 is to account for the offset of the pointer
-                let newNode = new Node(xCoord,yCoord,id.getIdIncrement())
+                let newNode = new Node(xCoord,yCoord,id.getIdIncrement(),graph)
                 newNode.nodeEventListenerPointer(pointer)
                 graph.addNode(newNode.getNode())
                 pointer.setDefaultState()

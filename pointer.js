@@ -9,10 +9,12 @@ class Pointer{
     }
     removeEraseEventListener(){
         //cursor id is the id of the dome node that is acting as the cursor
-        this._canvas.removeEventListener("mousemove",this.canvasEraseCursor)
-        this._eraserCursor.removeEventListener("mousemove",this.canvasEraseCursor)
-        this._toolbar.removeEventListener("mousemove",this.toolbarEraseCursor)
-        this._eraserCursor.style["left"] = "-200px"
+        if (this.isEraseState()){
+            this._canvas.removeEventListener("mousemove",this.canvasEraseCursor)
+            this._eraserCursor.removeEventListener("mousemove",this.canvasEraseCursor)
+            this._toolbar.removeEventListener("mousemove",this.toolbarEraseCursor)
+            this._eraserCursor.style["left"] = "-200px"
+        }
     }
     setNodeState(){
         this.removeEraseEventListener()
@@ -80,6 +82,11 @@ class Pointer{
         this._state = "default"
         this._canvas.style["cursor"] = "auto"
     }
+    setEdgeState(){
+        this.removeEraseEventListener()
+        this._state = "edge"
+        this._canvas["cursor"] = "crosshair"
+    }
     isEraseState(){
         return this._state === "erase" ? true:false
     }
@@ -88,6 +95,9 @@ class Pointer{
     }
     isDefaultState(){
         return this._state === "default" ? true:false
+    }
+    isEdgeState(){
+        return this._state === "edge" ? true:false
     }
     getState(){
         return this._state
@@ -100,6 +110,9 @@ class Pointer{
     }
     nodeState(){
         return "node"
+    }
+    edgeState(){
+        return "edge"
     }
     getToolBarHeight(){
         return this._toolbar.getBoundingClientRect().bottom

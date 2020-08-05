@@ -65,6 +65,14 @@ body{
 .node{
     cursor: grab;
 }
+
+@keyframes spin{
+    from {transform:rotate(0deg);}
+    to {transform:rotate(359deg);}
+}
+.active-node{
+    animation: spin 5s infinite linear;
+}
 /*==========node end=======*/
 /*========== test =======*/
 .test-node{
