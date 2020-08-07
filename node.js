@@ -1,15 +1,20 @@
 class Node{
-    constructor (x,y,id,canvas){
+    constructor (x,y,id,canvas,addEdge){
         //x and y are the respective coordinates on which to place the node in the svg canvas
         this._id = id//id should count up from 0 to one.
         this._radius = "15"
         this._cx = x
         this._cy = y
+        // the following offsets will be absolute==========================
+        this._xOffSet = 0//this is the offset caused by the translation
+        this._yOffSet = 0//this is the offset caused by the translation
+        //=================================================================
         this._fill = "black"
         this._node = document.createElementNS("http://www.w3.org/2000/svg","circle")
         this._active = false //true if the node has been clicked and the option to add an edge is available
         this._canBeClicked = false //this will be used to validate the if a click can be considered a "quickClick"
         this._canvas = canvas
+        this._addEdgeBtn = document.getElementById(addEdge)
     }
     getId(){
         return this._id   
@@ -54,7 +59,7 @@ class Node{
             console.error(`invalid fill for node with id ${this._id}`)
         }
     }
-    quickClickInterval(instance){
+    _quickClickInterval(instance){
         instance._canBeClicked = true
         window.setTimeout(function(){
             instance._canBeClicked = false
@@ -71,7 +76,7 @@ class Node{
             }
         })
         this._node.addEventListener("mousedown",function(event){
-            instance.quickClickInterval(instance)
+            instance._quickClickInterval(instance)
             switch(pointer.getState()){
                 case pointer.defaultState():
                     node.style["cursor"] = "grabbing"
@@ -90,9 +95,9 @@ class Node{
                     break
             }
         })
-        this.nodeEventListener(pointer)
+        this._nodeEventListener(pointer)
     }
-    nodeEventListener(pointer){
+    _nodeEventListener(pointer){
         let node = this._node
         let instance = this
         let toolBarHeight = pointer.getToolBarHeight()
@@ -101,6 +106,8 @@ class Node{
         node.addEventListener("mousemove",function(event){
             if (pointer.isDefaultState() && node.style["cursor"] === "grabbing"){
                 node.style.transform = `translate(${event.clientX-xInit}px,${event.clientY-yInit}px)`
+                instance._xOffSet = event.clientX-xInit
+                instance = event.clientY - this._cy
                 //need to update actual cx and cy value of the element here
             }
             else if (pointer.isEraseState()){
@@ -131,5 +138,10 @@ class Node{
         this._node.id = `${this._id}`
         return this._node
     }
-    
+    _activateAddEdgeBtn(){
+        this._addEdgeBtn.style["opacity"] = "1"
+    }
+    _deavtivateAddEdgeBtn(){
+        this._addEdgeBtn.style["opacity"] = "0"
+    }
 }

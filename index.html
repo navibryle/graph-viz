@@ -6,14 +6,15 @@
         <script src="https://kit.fontawesome.com/6727f5493e.js" crossorigin="anonymous"></script>
         <script src = "node.js" type="application/javascript" defer></script>
         <script src = "pointer.js" type="application/javascript" defer></script>
-        <script src = "graph.js" type="application/javascript" defer></script>
+        <script src = "canvas.js" type="application/javascript" defer></script>
         <script src = "misc.js" type="application/javascript" defer></script>
         <script src = "main.js" type="application/javascript" defer></script>
     </head>
     <body>
             <div id = "main-wrapper">
                 <div id = "node-menu">
-                    <div id = "add-edge">add edge</div>
+                    <!--this will contain the menu for the nodes and will be opaque until a node is right clicked-->
+                    
                 </div>
                 <div id = "toolbar">
                     <!-- There should only be one svg-->
@@ -24,15 +25,11 @@
                     </button>
                     <button id = "removeNode" class = "genericBtn">
                         <div class = "fas fa-ban"></div>
-                        <div>Remove</div>
+                        <div>remove</div>
                     </button>
                     <button id = "randomNode" class = "genericBtn">
                         <div class = "fas fa-dice"></div>
-                        <div>Random</div>
-                    </button>
-                    <button id = "addEdge" class = "genericBtn nodeBtn">
-                        <div class = "fas fa-slash"></div>
-                        <div>Edge</div>
+                        <div>random</div>
                     </button>
                 </div>
                 <svg id = "canvas" >

@@ -1,4 +1,4 @@
-class Graph{
+class Canvas{
     //this class should represent the canvas
     //this class will collect all the nodes
     constructor(canvasId){
@@ -27,7 +27,7 @@ class Graph{
             this._selected = null
         }
     }
-    isSelected(){
+    getSelectedNode(){
         return this._selected
     }
     checkCanvasId(canvasId){
@@ -37,5 +37,15 @@ class Graph{
         catch{
             console.error("Incorrect canvas Id has been used")
         }
+    }
+    getCanvas(){
+        return this._canvas
+    }
+    createEdge(){
+        //need to create an svg and have its one end on the center of the node and the other end tracing the pointer
+        //i will write an event listener to change the x2 and y2 components of the line and update it on every mousemove
+        this._canvas.addEventListener("mousemove",function(){
+            //need to set the initial state
+        })
     }
 }

@@ -46,6 +46,9 @@ body{
     background: black;
     color: white;
 }
+.hide{
+    opacity: 0;
+}
 /*==========buttons end=====*/
 /*==========canvas =========*/
 #canvas{
