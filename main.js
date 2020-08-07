@@ -42,13 +42,19 @@ function canvasNodeEventListener(pointer,id,canvas){
         }
     })
 }
-function addEdgeEventListener(canvas){
+function addEdgeEventListener(pointer,canvas){
     let addEdgeBtn = document.getElementById("addEdge")
     addEdgeBtn.addEventListener("click",function(event){
-        if (!pointer.isEdgeState()){
-            pointer.setEdgeState()
+        if (addEdgeBtn.style["opacity"] != "0"){
+            if (!pointer.isEdgeState()){
+                
+                pointer.setEdgeState()
+            }else{
+                canvas.removeEdge()
+                pointer.setDefaultState()
+            }
+            canvas.addEventListener()
         }
-        canvas.createEdge()
     })
 }
 //============= event listeners end =========
@@ -65,6 +71,6 @@ function main(){
     addNodeEventListener(pointer)
     deleteNodeEventListener(pointer)
     canvasNodeEventListener(pointer,id,canvas)
-
+    addEdgeEventListener(pointer,canvas)
 }
 main()

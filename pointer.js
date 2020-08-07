@@ -85,7 +85,7 @@ class Pointer{
     setEdgeState(){
         this.removeEraseEventListener()
         this._state = "edge"
-        this._canvas["cursor"] = "crosshair"
+        this._canvas.style["cursor"] = "crosshair"
     }
     isEraseState(){
         return this._state === "erase" ? true:false

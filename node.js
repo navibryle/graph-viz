@@ -3,8 +3,8 @@ class Node{
         //x and y are the respective coordinates on which to place the node in the svg canvas
         this._id = id//id should count up from 0 to one.
         this._radius = "15"
-        this._cx = x
-        this._cy = y
+        this._cx = x//this will be the initial coordinate before the translation
+        this._cy = y//this will be the initial coordinate before the translation
         // the following offsets will be absolute==========================
         this._xOffSet = 0//this is the offset caused by the translation
         this._yOffSet = 0//this is the offset caused by the translation
@@ -71,8 +71,18 @@ class Node{
         this._node.addEventListener("click",function(event){
             switch(pointer.getState()){
                 case pointer.eraseState():
-                    document.getElementById("canvas").removeChild(node)
+                    if (instance._active){
+                        //will be true if the node is active
+                        instance.deavtivateAddEdgeBtn()
+                        instance._active = false
+                        document.getElementById("canvas").removeChild(node)
+                    }else{ 
+                        document.getElementById("canvas").removeChild(node)
+                    }
+                    
                     break
+                case pointer.edgeState():
+                    //clicked on a node that 
             }
         })
         this._node.addEventListener("mousedown",function(event){
@@ -107,7 +117,7 @@ class Node{
             if (pointer.isDefaultState() && node.style["cursor"] === "grabbing"){
                 node.style.transform = `translate(${event.clientX-xInit}px,${event.clientY-yInit}px)`
                 instance._xOffSet = event.clientX-xInit
-                instance = event.clientY - this._cy
+                instance._yOffSet = event.clientY - this._cy
                 //need to update actual cx and cy value of the element here
             }
             else if (pointer.isEraseState()){
@@ -138,10 +148,18 @@ class Node{
         this._node.id = `${this._id}`
         return this._node
     }
-    _activateAddEdgeBtn(){
+    activateAddEdgeBtn(){
         this._addEdgeBtn.style["opacity"] = "1"
     }
-    _deavtivateAddEdgeBtn(){
+    deavtivateAddEdgeBtn(){
         this._addEdgeBtn.style["opacity"] = "0"
+    }
+    getXCoord(){
+        //this function will return the x coordinate in the svg canvas
+        return this._cx + this._xOffSet
+    }
+    getYCoord(){
+        //this function will return the y coordinate in the svg canvas
+        return this._cy + this._yOffSet
     }
 }
