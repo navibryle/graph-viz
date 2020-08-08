@@ -67,15 +67,7 @@ class Node{
         this._node.addEventListener("click",function(event){
             switch(pointer.getState()){
                 case pointer.eraseState():
-                    if (instance._active){
-                        //will be true if the node is active
-                        instance.deavtivateAddEdgeBtn()
-                        instance._active = false
-                        document.getElementById("canvas").removeChild(node)
-                    }else{ 
-                        document.getElementById("canvas").removeChild(node)
-                    }
-                    
+                    document.getElementById("canvas").removeChild(node)
                     break
                 case pointer.edgeState():
                     //clicked on a node with the intention of permanently setting 
@@ -91,8 +83,12 @@ class Node{
         })
         this._node.addEventListener("mouseup",function(event){
             if (instance._canBeClicked === true){
-                instance._canvas.clickedNode(instance)
-                instance.updateState()
+                //this if statement is made to catch only quick clicks
+                if (pointer.isDefaultState() && !instance._active){
+                    instance.activateNode()
+                }else if (instance._active && (pointer.isDefaultState() || pointer.isEraseState())){
+                    instance.deactivateNode()
+                }
                 instance._canBeClicked = false
             }
             switch(pointer.getState()){
@@ -112,7 +108,7 @@ class Node{
                 node.setAttribute("cx",event.clientX)
                 node.setAttribute("cy",event.clientY - toolBarHeight)
                 instance._cx = event.clientX
-                instance._cy = event.clientY
+                instance._cy = event.clientY - toolBarHeight
             }
             else if (pointer.isEraseState()){
                 node.style["cursor"] = "none"
@@ -123,22 +119,32 @@ class Node{
                 node.setAttribute("cx",event.clientX)
                 node.setAttribute("cy",event.clientY - toolBarHeight)
                 instance._cx = event.clientX
-                instance._cy = event.clientY
+                instance._cy = event.clientY - toolBarHeight
             }
         })
     }
+    activateNode(){
+        //node should only be activatable in default state
+        this._node.setAttribute("stroke","green")
+        this._node.setAttribute("stroke-dasharray","2")
+        this._node.setAttribute("stroke-width","3")
+        this._active = true
+        this._canvas.storeNode(this)
+        this.activateAddEdgeBtn()
+    }
+    deactivateNode(){
+        this._node.setAttribute("stroke","")
+        this._node.setAttribute("stroke-dasharray","")
+        this._node.setAttribute("stroke-width","")
+        this._active = false
+        this.deavtivateAddEdgeBtn()
+        this._canvas.deleteCurNode()
+    }
     updateState(){
         if (this._active){
-            this._node.setAttribute("stroke","")
-            this._node.setAttribute("stroke-dasharray","")
-            this._node.setAttribute("stroke-width","")
-            //use element.classList.remove("class_name") instead after your done testing
-            this._active = false
+            this.deactivateNode()
         }else{
-            this._node.setAttribute("stroke","green")
-            this._node.setAttribute("stroke-dasharray","2")
-            this._node.setAttribute("stroke-width","3")
-            this._active = true
+            this.activateNode()
         }
     }
     getNode(){ 
