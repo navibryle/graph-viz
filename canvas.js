@@ -65,14 +65,12 @@ class Canvas{
     addEventListener(){
         //need to create an svg and have its one end on the center of the node and the other end tracing the pointer
         //i will write an event listener to change the x2 and y2 components of the line and update it on every mousemove
-        let x1 = this._selected.getXCoord()
-        let y1 = this._selected.getYCoord()
         let instance = this
         let toolbarHeight = this._canvas.getBoundingClientRect().top
         this._canvas.addEventListener("mousemove",function(event){
             //need to set the initial state
             if (instance._edge === null && instance._canvas.style["cursor"] === "crosshair"){
-                instance.setEdge(x1,y1,event.clientX,event.clientY-toolbarHeight)
+                instance.setEdge(instance._selected.getCx(),instance._selected.getCy(),event.clientX,event.clientY-toolbarHeight)
                 this.appendChild(instance._edge)
             }
             else if (instance._canvas.style["cursor"] === "crosshair"){

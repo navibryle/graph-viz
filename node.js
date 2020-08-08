@@ -5,10 +5,6 @@ class Node{
         this._radius = "15"
         this._cx = x//this will be the initial coordinate before the translation
         this._cy = y//this will be the initial coordinate before the translation
-        // the following offsets will be absolute==========================
-        this._xOffSet = 0//this is the offset caused by the translation
-        this._yOffSet = 0//this is the offset caused by the translation
-        //=================================================================
         this._fill = "black"
         this._node = document.createElementNS("http://www.w3.org/2000/svg","circle")
         this._active = false //true if the node has been clicked and the option to add an edge is available
@@ -82,7 +78,7 @@ class Node{
                     
                     break
                 case pointer.edgeState():
-                    //clicked on a node that 
+                    //clicked on a node with the intention of permanently setting 
             }
         })
         this._node.addEventListener("mousedown",function(event){
@@ -109,19 +105,25 @@ class Node{
     }
     _nodeEventListener(pointer){
         let node = this._node
-        let instance = this
         let toolBarHeight = pointer.getToolBarHeight()
-        let xInit = this._cx
-        let yInit = this._cy+toolBarHeight// "getBoundingClientRect" is used to get the toolbar height
+        let instance = this
         node.addEventListener("mousemove",function(event){
             if (pointer.isDefaultState() && node.style["cursor"] === "grabbing"){
-                node.style.transform = `translate(${event.clientX-xInit}px,${event.clientY-yInit}px)`
-                instance._xOffSet = event.clientX-xInit
-                instance._yOffSet = event.clientY - this._cy
-                //need to update actual cx and cy value of the element here
+                node.setAttribute("cx",event.clientX)
+                node.setAttribute("cy",event.clientY - toolBarHeight)
+                instance._cx = event.clientX
+                instance._cy = event.clientY
             }
             else if (pointer.isEraseState()){
                 node.style["cursor"] = "none"
+            }
+        })
+        this._canvas._canvas.addEventListener("mousemove",function(event){
+            if (pointer.isDefaultState() && node.style["cursor"] === "grabbing"){
+                node.setAttribute("cx",event.clientX)
+                node.setAttribute("cy",event.clientY - toolBarHeight)
+                instance._cx = event.clientX
+                instance._cy = event.clientY
             }
         })
     }
@@ -153,13 +155,5 @@ class Node{
     }
     deavtivateAddEdgeBtn(){
         this._addEdgeBtn.style["opacity"] = "0"
-    }
-    getXCoord(){
-        //this function will return the x coordinate in the svg canvas
-        return this._cx + this._xOffSet
-    }
-    getYCoord(){
-        //this function will return the y coordinate in the svg canvas
-        return this._cy + this._yOffSet
     }
 }
