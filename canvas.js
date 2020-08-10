@@ -76,9 +76,10 @@ class Canvas{
         this._canvas.addEventListener("mousemove",function(event){
             //need to set the initial state
             if (instance._edge === null && instance._canvas.style["cursor"] === "crosshair"){
-
                 instance._edge = new Edge(instance)
-                instance._edge.updateEndpoint(event.clientX,event.clientY-toolbarHeight)
+                //instance._edge.updateEndpoint(event.clientX,event.clientY-toolbarHeight)
+                instance._edge.updateEndpoint(event.clientX,0)
+                
             }
             else if (instance._canvas.style["cursor"] === "crosshair"){
                 instance._edge.updateEndpoint(event.clientX,event.clientY-toolbarHeight)

@@ -18,9 +18,9 @@ body{
     position: relative;
     height: 100%;
     width: 100%;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
 }
 /*==========main wrapper=======*/
 /*==========tool bar==========*/
@@ -28,6 +28,8 @@ body{
     background:rgb(209, 208, 205);
     /*testing properties*/
     /*testing properties end*/
+    flex-grow: 0;
+    min-height: 60px;/*needed to add this so font-awsone doesnt mess up the height of the toolbar*/
 }
 /*==========grid end=========*/
 /*==========buttons=========*/
@@ -52,8 +54,7 @@ body{
 /*==========buttons end=====*/
 /*==========canvas =========*/
 #canvas{
-    position: relative;
-    flex-grow: 1;
+   flex-grow: 1;
 }
 #erase-cursor{
     position: fixed;

@@ -115,7 +115,7 @@ class Node{
             }
         })
         this._canvas._canvas.addEventListener("mousemove",function(event){
-            if (pointer.isDefaultState() && node.style["cursor"] === "grabbing"){
+            if (node.style["cursor"] === "grabbing" && pointer.isDefaultState()){
                 node.setAttribute("cx",event.clientX)
                 node.setAttribute("cy",event.clientY - toolBarHeight)
                 instance._cx = event.clientX

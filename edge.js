@@ -10,7 +10,6 @@ class Edge{
         this._edge = document.createElementNS("http://www.w3.org/2000/svg","line")
         this._canvas = canvas
         this.initEdge()
-        console.log("created a new edge")
     }
     initEdge(){ 
         this._edge.setAttribute("x1",this._node1.getCx())
