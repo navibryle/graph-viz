@@ -32,6 +32,9 @@ class Canvas{
         }
     }
     storeNode(node){
+        if (this._selected != null){
+            this._selected.deactivateNode()
+        }
         this._selected = node
     }
     deleteCurNode(){

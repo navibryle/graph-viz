@@ -47,10 +47,8 @@ function addEdgeEventListener(pointer,canvas){
     addEdgeBtn.addEventListener("click",function(event){
         if (addEdgeBtn.style["opacity"] != "0"){
             if (!pointer.isEdgeState()){
-                
                 pointer.setEdgeState()
             }else{
-                
                 canvas.removeEdge()
                 pointer.setDefaultState()
             }
