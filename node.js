@@ -11,6 +11,8 @@ class Node{
         this._canBeClicked = false //this will be used to validate the if a click can be considered a "quickClick"
         this._canvas = canvas
         this._addEdgeBtn = document.getElementById(addEdge)
+        this._edge = []
+        this._edgeNum = 0
     }
     getId(){
         return this._id   
@@ -67,10 +69,17 @@ class Node{
         this._node.addEventListener("click",function(event){
             switch(pointer.getState()){
                 case pointer.eraseState():
-                    document.getElementById("canvas").removeChild(node)
+                    instance._canvas._canvas.removeChild(node)
                     break
                 case pointer.edgeState():
-                    //clicked on a node with the intention of permanently setting 
+                    let node1 = instance._canvas.getSelectedNode()
+                    let edge = instance._canvas.getActiveEdge()
+                    if (node1.getNode() != this && edge != null){
+                        instance.addEdge(edge)
+                        edge.setSecondNode(instance)
+                        pointer.setDefaultState()
+                        instance._canvas.setEdge(null)
+                    }
             }
         })
         this._node.addEventListener("mousedown",function(event){
@@ -105,10 +114,18 @@ class Node{
         let instance = this
         node.addEventListener("mousemove",function(event){
             if (pointer.isDefaultState() && node.style["cursor"] === "grabbing"){
-                node.setAttribute("cx",event.clientX)
-                node.setAttribute("cy",event.clientY - toolBarHeight)
-                instance._cx = event.clientX
-                instance._cy = event.clientY - toolBarHeight
+                let newX = event.clientX
+                let newY = event.clientY - toolBarHeight
+                node.setAttribute("cx",newX)
+                node.setAttribute("cy",newY)
+                instance._cx = newX
+                instance._cy = newY
+                //need to pass the coordinated to the edge and have them move
+                for (let i = 0;i < instance._edgeNum; i++){
+                    //this loop will update the endpoint of all the nodes
+                    //this has to take O(n) time no matter what since we always have to update each node
+                    instance._edge[i].updatePos(instance,newX,newY)
+                }
             }
             else if (pointer.isEraseState()){
                 node.style["cursor"] = "none"
@@ -147,7 +164,7 @@ class Node{
             this.activateNode()
         }
     }
-    getNode(){ 
+    initNode(){ 
         this._node.setAttribute("r",this._radius)
         this._node.setAttribute("cx",this._cx)
         this._node.setAttribute("cy",this._cy)
@@ -156,10 +173,25 @@ class Node{
         this._node.id = `${this._id}`
         return this._node
     }
+    getNode(){
+        return this._node
+    }
     activateAddEdgeBtn(){
         this._addEdgeBtn.style["opacity"] = "1"
     }
     deavtivateAddEdgeBtn(){
         this._addEdgeBtn.style["opacity"] = "0"
+    }
+    addEdge(edge){
+        this._edge.push(edge)
+        this._edgeNum += 1
+    }
+    removeEdge(edge){
+        for (let i = 0; i <this._edgeNum; i++){
+            if (this._edge[i].getEdge() === edge.getEdge()){ //getEdge()  will give the svg line representing an edge
+                this._edge.splice(i,1)
+                this._edgeNum -= 1
+            }
+        }
     }
 }

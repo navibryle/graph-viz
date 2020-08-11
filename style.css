@@ -78,6 +78,14 @@ body{
     animation: spin 5s infinite linear;
 }
 /*==========node end=======*/
+/*==========edge===========*/
+.edge-unclickable{
+    pointer-events: none;
+}
+.edge-clickable{
+    pointer-events: auto;
+}
+/*==========edge end=======*/
 /*========== test =======*/
 .test-node{
     position: absolute;
