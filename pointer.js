@@ -1,6 +1,7 @@
 class Pointer{
     constructor(nodeSvg,eraseSvg,canvasId,eraserCursorId,toolbarId){
         this._state = "default"
+        this._prevState = "default"
         this._nodeSvg = nodeSvg
         this._eraseSvg = eraseSvg
         this._canvas = document.getElementById(canvasId)
@@ -16,14 +17,18 @@ class Pointer{
             this._eraserCursor.style["left"] = "-200px"
         }
     }
+    _updateStates(newState){
+        this._prevState = this._state
+        this._state = newState
+    }
     setNodeState(){
         this.removeEraseEventListener()
-        this._state = "node"
+        this._updateStates("node")
         this._canvas.style["cursor"] = this._nodeSvg
     }
     setEraseState(){
         //cursor id is the id of the dome node that is acting as the cursor
-        this._state = "erase"
+        this._updateStates("erase")
         //======parameters to be passed to event listener====
         this._canvas.initX = null
         this._canvas.initY = null
@@ -42,11 +47,21 @@ class Pointer{
         //==============loop to make sure the cursor updates as soon as possible==============
         const eraseEvent = () =>{
             this._eraserCursor.style.transform = `translate(${this._canvas.xCoord-this._canvas.initX-5}px,
-                ${this._canvas.yCoord-this._canvas.initY-25}px)`//the constants are there to make sure the pointer is offset under the eraserCurosr
+                ${this._canvas.yCoord-this._canvas.initY-22}px)`//the constants are there to make sure the pointer is offset under the eraserCurosr
             requestAnimationFrame(eraseEvent)
         }
         requestAnimationFrame(eraseEvent)
         //====================================================================================
+    }
+    setDefaultState(){
+        this.removeEraseEventListener()
+        this._updateStates("default")
+        this._canvas.style["cursor"] = "auto"
+    }
+    setEdgeState(){
+        this.removeEraseEventListener()
+        this._updateStates("edge")
+        this._canvas.style["cursor"] = "crosshair"
     }
     toobarEraseCursor(event){
         //makes sure that the cursor goes back to default when in the toolbar
@@ -76,16 +91,6 @@ class Pointer{
             cursor.xCoord = event.clientX
             cursor.yCoord = event.clientY
         }
-    }
-    setDefaultState(){
-        this.removeEraseEventListener()
-        this._state = "default"
-        this._canvas.style["cursor"] = "auto"
-    }
-    setEdgeState(){
-        this.removeEraseEventListener()
-        this._state = "edge"
-        this._canvas.style["cursor"] = "crosshair"
     }
     isEraseState(){
         return this._state === "erase" ? true:false

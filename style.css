@@ -36,10 +36,12 @@ body{
 .genericBtn{
     border-style: dotted;
     border-width: 3px;
-    background: rgb(156, 155, 154);
     border-radius: 4px;
     margin:10px;
     border-image: none;
+}
+.idle{
+    background: rgb(156, 155, 154);
 }
 .genericBtn:active{
     background:  rgb(117, 117, 117);
@@ -50,6 +52,9 @@ body{
 }
 .hide{
     opacity: 0;
+}
+.active{
+    background:rgb(32, 48, 74);
 }
 /*==========buttons end=====*/
 /*==========canvas =========*/
@@ -62,7 +67,6 @@ body{
     top: -30px;
     opacity: 1;
     backface-visibility: hidden;
-    cursor: none;
     pointer-events: none;
 }
 /*==========node===========*/

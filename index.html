@@ -8,8 +8,9 @@
         <script src = "pointer.js" type="application/javascript" defer></script>
         <script src = "canvas.js" type="application/javascript" defer></script>
         <script src = "misc.js" type="application/javascript" defer></script>
-        <script src = "main.js" type="application/javascript" defer></script>
+        <script src = "toolbar.js" type="application/javascript" defer></script>
         <script src = "edge.js" type="application/javascript" defer></script>
+        <script src = "main.js" type="application/javascript" defer></script>
     </head>
     <body>
         
@@ -21,16 +22,15 @@
                 <div id = "toolbar">
                     <!-- There should only be one svg-->
                     <!--this will contain the navbar that will always be on top it will be position sticky-->
-                    <button id = "addNode" class = "genericBtn">
-
+                    <button id = "addNode" class = "genericBtn idle">
                         <div class = "fas fa-plus"></div>
                         <div>Add</div>
                     </button>
-                    <button id = "removeNode" class = "genericBtn">
+                    <button id = "removeNode" class = "genericBtn idle">
                         <div class = "fas fa-ban"></div>
                         <div>remove</div>
                     </button>
-                    <button id = "randomNode" class = "genericBtn">
+                    <button id = "randomNode" class = "genericBtn idle">
                         <div class = "fas fa-dice"></div>
                         <div>random</div>
                     </button>

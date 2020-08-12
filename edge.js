@@ -8,7 +8,7 @@ class Edge{
         this._pointer = pointer
         this.initEdge()
     }
-    initEdge(){ 
+    initEdge(){
         this.updateNode1Endpoint(this._node1.getCx(),this._node1.getCy())
         this._edge.setAttribute("stroke-width","7px")
         this._edge.setAttribute("stroke","black")
@@ -53,13 +53,18 @@ class Edge{
         let pointer = this._pointer
         let instance = this
         this._edge.addEventListener("click",function(){
-            
             switch (pointer.getState()){
                 case (pointer.eraseState()):
                     instance._node1.removeEdge(instance)
                     instance._node2.removeEdge(instance)
-                    instance._canvas._canvas.removeChild(this)
+                    instance.removeEdge()
             }
         })
+    }
+    removeEdge(){
+        if (this._canvas.getActiveEdge() === this){
+            this._canvas.setEdge(null)
+        }
+        this._canvas._canvas.removeChild(this._edge)
     }
 }
