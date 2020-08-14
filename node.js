@@ -87,6 +87,7 @@ class Node{
             switch(pointer.getState()){
                 case pointer.defaultState():
                     node.style["cursor"] = "grabbing"
+
                     break
             }
         })
@@ -132,11 +133,22 @@ class Node{
             }
         })
         this._canvas._canvas.addEventListener("mousemove",function(event){
-            if (node.style["cursor"] === "grabbing" && pointer.isDefaultState()){
-                node.setAttribute("cx",event.clientX)
-                node.setAttribute("cy",event.clientY - toolBarHeight)
-                instance._cx = event.clientX
-                instance._cy = event.clientY - toolBarHeight
+            if (pointer.isDefaultState() && node.style["cursor"] === "grabbing"){
+                let newX = event.clientX
+                let newY = event.clientY - toolBarHeight
+                node.setAttribute("cx",newX)
+                node.setAttribute("cy",newY)
+                instance._cx = newX
+                instance._cy = newY
+                //need to pass the coordinated to the edge and have them move
+                for (let i = 0;i < instance._edgeNum; i++){
+                    //this loop will update the endpoint of all the nodes
+                    //this has to take O(n) time no matter what since we always have to update each node
+                    instance._edge[i].updatePos(instance,newX,newY)
+                }
+            }
+            else if (pointer.isEraseState()){
+                node.style["cursor"] = "none"
             }
         })
     }

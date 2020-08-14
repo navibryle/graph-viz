@@ -13,7 +13,7 @@ class Edge{
         this._edge.setAttribute("stroke-width","7px")
         this._edge.setAttribute("stroke","black")
         this._edge.classList = "edge-unclickable edge"
-        this._canvas._canvas.appendChild(this._edge)
+        this._canvas._canvas.insertAdjacentElement("afterbegin",this._edge)
     }
     getFirstNode(){
         return this._node1
@@ -36,7 +36,7 @@ class Edge{
         this._node2 = newNode
         this.updateNode2Endpoint(newNode.getCx(),newNode.getCy())
         this._edge.classList.replace("edge-unclickable","edge-clickable")
-        this._eventListeners()
+        //this._eventListeners()
     }
     setFirstNode(newNode){
         this._node1 = newNode
@@ -67,4 +67,10 @@ class Edge{
         }
         this._canvas._canvas.removeChild(this._edge)
     }
+    /*
+    addNodeEvent(node){
+        node.addEventListener("mousemove",function(){
+
+        })
+    }*/
 }

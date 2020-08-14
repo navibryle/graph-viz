@@ -23,7 +23,7 @@ class Toolbar{
             this.deactivateBtn(this._active)
             this._active = null
         }else{
-            console.log("hre")
+            
             //there is an active btn but the btnId btn is different
             this.deactivateBtn(this._active)
             this.activateBtn(newBtn)

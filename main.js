@@ -23,7 +23,7 @@ function deleteNodeEventListener(pointer,toolbar){
         }
     })
 }
-function canvasNodeEventListener(pointer,id,canvas){
+function canvasNodeEventListener(pointer,id,canvas,toolbar){
     /*
     cases:
         -clicked on a node
@@ -37,6 +37,7 @@ function canvasNodeEventListener(pointer,id,canvas){
     canvas.getCanvas().addEventListener("click",function(event){
         switch (pointer.getState()){
             case "node":
+                toolbar.setActive("addNode")
                 let toolbarHeight = this.getBoundingClientRect().top
                 let xCoord = event.clientX+16//16 is to account for the offset of the pointer
                 let yCoord = event.clientY - toolbarHeight+16//16 is to account for the offset of the pointer
@@ -85,7 +86,7 @@ function main(){
     addNodeEventListener(pointer,toolbar)
     deleteNodeEventListener(pointer,toolbar)
     addEdgeEventListener(pointer,canvas,toolbar)
-    canvasNodeEventListener(pointer,id,canvas)
+    canvasNodeEventListener(pointer,id,canvas,toolbar)
     
 }
 main()

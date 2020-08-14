@@ -16,7 +16,7 @@ class Canvas{
         //node must be of type Node
         this._size += 1
         this._nodes.push(node)
-        this._canvas.appendChild(node)
+        this._canvas.insertAdjacentElement("beforeend",node)
     }
     clickedNode(node){
         if (this._selected === null){
