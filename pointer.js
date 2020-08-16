@@ -15,6 +15,7 @@ class Pointer{
             this._eraserCursor.removeEventListener("mousemove",this.canvasEraseCursor)
             this._toolbar.removeEventListener("mousemove",this.toolbarEraseCursor)
             this._eraserCursor.style["left"] = "-200px"
+            this._canvas.style["cursor"] = "auto"
         }
     }
     _updateStates(newState){

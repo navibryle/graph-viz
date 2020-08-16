@@ -31,7 +31,7 @@ class Canvas{
             this._selected = null
         }
     }
-    storeNode(node){
+    setSelectedNode(node){
         if (this._selected != null){
             this._selected.deactivateNode()
         }

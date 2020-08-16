@@ -36,13 +36,14 @@ class Edge{
         this._node2 = newNode
         this.updateNode2Endpoint(newNode.getCx(),newNode.getCy())
         this._edge.classList.replace("edge-unclickable","edge-clickable")
-        //this._eventListeners()
+        this._eventListeners()
     }
     setFirstNode(newNode){
         this._node1 = newNode
         this.updateNode1Endpoint(newNode.getCx(),newNode.getCy())
     }
     updatePos(node,newX,newY){
+        //node is the node that is being moved
         if (node === this._node1){
             this.updateNode1Endpoint(newX,newY)
         }else if (node === this._node2){
@@ -55,16 +56,20 @@ class Edge{
         this._edge.addEventListener("click",function(){
             switch (pointer.getState()){
                 case (pointer.eraseState()):
-                    instance._node1.removeEdge(instance)
-                    instance._node2.removeEdge(instance)
                     instance.removeEdge()
             }
         })
     }
     removeEdge(){
+        //this will remove the edge from the dom tree
         if (this._canvas.getActiveEdge() === this){
             this._canvas.setEdge(null)
+            this._pointer.setDefaultState()
         }
+        if (this._node2 != null){
+            this._node2.removeEdge(this)
+        }
+        this._node1.removeEdge(this)
         this._canvas._canvas.removeChild(this._edge)
     }
     /*

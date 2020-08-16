@@ -36,7 +36,7 @@ function canvasNodeEventListener(pointer,id,canvas,toolbar){
     */
     canvas.getCanvas().addEventListener("click",function(event){
         switch (pointer.getState()){
-            case "node":
+            case pointer.nodeState():
                 toolbar.setActive("addNode")
                 let toolbarHeight = this.getBoundingClientRect().top
                 let xCoord = event.clientX+16//16 is to account for the offset of the pointer
@@ -46,7 +46,8 @@ function canvasNodeEventListener(pointer,id,canvas,toolbar){
                 canvas.addNode(newNode.initNode())
                 pointer.setDefaultState()
                 break
-
+            case pointer.defaultState():
+                canvas.setSelectedNode(null)
         }
     })
 }
@@ -66,10 +67,7 @@ function addEdgeEventListener(pointer,canvas,toolbar){
         }
     })
 }
-function buttonStateEL(pointer,aList){
-    //aList is a list of id's corresponidng to buttons
 
-}
 //============= event listeners end =========
 //============= test ========================
 //need to add a new event listener for adding edges. This new event listener will use the canvas object to track which node is currently active

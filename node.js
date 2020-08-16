@@ -7,6 +7,7 @@ class Node{
         this._cy = y//this will be the initial coordinate before the translation
         this._fill = "black"
         this._node = document.createElementNS("http://www.w3.org/2000/svg","circle")
+        this._runtimeNode = document.createElementNS("http://www.w3.org/2000/svg","circle")
         this._active = false //true if the node has been clicked and the option to add an edge is available
         this._canBeClicked = false //this will be used to validate the if a click can be considered a "quickClick"
         this._canvas = canvas
@@ -63,22 +64,37 @@ class Node{
             instance._canBeClicked = false
         },100)
     }
+    _canAddEdge(edge){
+        let lenEdges = this._edge.length
+        let firstNode = edge.getFirstNode().getNode()
+        for (let i = 0; i<lenEdges;i++){
+            //second node of the edge parameters is this
+            if (this._edge[i].getFirstNode().getNode() === firstNode || this._edge[i].getSecondNode().getNode() === firstNode){
+                return false
+            }
+        }
+        return true
+    }
     nodeEventListenerPointer(pointer){
         var node = this._node
         var instance = this
         this._node.addEventListener("click",function(event){
+            event.stopPropagation()
             switch(pointer.getState()){
                 case pointer.eraseState():
                     instance._canvas._canvas.removeChild(node)
                     break
                 case pointer.edgeState():
-                    let node1 = instance._canvas.getSelectedNode()
                     let edge = instance._canvas.getActiveEdge()
-                    if (node1.getNode() != this && edge != null){
+                    let canAdd = instance._canAddEdge(edge)
+                    let node1 = instance._canvas.getSelectedNode()
+                    if (node1.getNode() != this && edge != null && canAdd){
                         instance.addEdge(edge)
                         edge.setSecondNode(instance)
                         pointer.setDefaultState()
                         instance._canvas.setEdge(null)
+                    }else if (!canAdd){
+                        edge.removeEdge()
                     }
             }
         })
@@ -128,7 +144,8 @@ class Node{
                     instance._edge[i].updatePos(instance,newX,newY)
                 }
             }
-            else if (pointer.isEraseState()){
+            else if (pointer.isEraseState() && node.style["cursor"] === "grab"){
+                
                 node.style["cursor"] = "none"
             }
         })
@@ -147,9 +164,6 @@ class Node{
                     instance._edge[i].updatePos(instance,newX,newY)
                 }
             }
-            else if (pointer.isEraseState()){
-                node.style["cursor"] = "none"
-            }
         })
     }
     activateNode(){
@@ -158,7 +172,7 @@ class Node{
         this._node.setAttribute("stroke-dasharray","2")
         this._node.setAttribute("stroke-width","3")
         this._active = true
-        this._canvas.storeNode(this)
+        this._canvas.setSelectedNode(this)
         this.activateAddEdgeBtn()
     }
     deactivateNode(){
