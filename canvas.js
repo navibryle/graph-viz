@@ -71,6 +71,8 @@ class Canvas{
             if (instance._edge === null && pointer.isEdgeState()){
                 instance._edge = new Edge(instance,pointer)
                 instance._selected.addEdge(instance._edge)
+                console.log(instance._selected._edge)
+
                 instance._edge.updateNode2Endpoint(event.clientX,0)
             }
             else if (pointer.isEdgeState()){

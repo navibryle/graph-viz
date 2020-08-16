@@ -1,19 +1,13 @@
 class Node{
-    constructor (x,y,id,canvas,addEdge){
+    constructor (x,y,id,canvas,radius,color){
         //x and y are the respective coordinates on which to place the node in the svg canvas
         this._id = id//id should count up from 0 to one.
-        this._radius = "15"
+        this._radius = radius.toString()
         this._cx = x//this will be the initial coordinate before the translation
         this._cy = y//this will be the initial coordinate before the translation
-        this._fill = "black"
+        this._fill = color
         this._node = document.createElementNS("http://www.w3.org/2000/svg","circle")
-        this._runtimeNode = document.createElementNS("http://www.w3.org/2000/svg","circle")
-        this._active = false //true if the node has been clicked and the option to add an edge is available
-        this._canBeClicked = false //this will be used to validate the if a click can be considered a "quickClick"
         this._canvas = canvas
-        this._addEdgeBtn = document.getElementById(addEdge)
-        this._edge = []
-        this._edgeNum = 0
     }
     getId(){
         return this._id   
@@ -58,11 +52,26 @@ class Node{
             console.error(`invalid fill for node with id ${this._id}`)
         }
     }
-    _quickClickInterval(instance){
-        instance._canBeClicked = true
-        window.setTimeout(function(){
-            instance._canBeClicked = false
-        },100)
+    initNode(){ 
+        this._node.setAttribute("r",this._radius)
+        this._node.setAttribute("cx",this._cx)
+        this._node.setAttribute("cy",this._cy)
+        this._node.setAttribute("fill",this._fill)
+        this._node.setAttribute("class","node")
+        this._node.id = `${this._id}`
+        return this._node
+    }
+    getNode(){
+        return this._node
+    }
+    
+}
+class NodeEdge extends Node{
+    constructor(x,y,id,canvas,radius,color,addEdgeBtn){
+        super(x,y,id,canvas,radius,color)
+        this._addEdgeBtn = document.getElementById(addEdgeBtn)
+        this._edge = []
+        this._edgeNum = 0
     }
     _canAddEdge(edge){
         let lenEdges = this._edge.length
@@ -75,38 +84,47 @@ class Node{
         }
         return true
     }
+    activateAddEdgeBtn(){
+        this._addEdgeBtn.style["opacity"] = "1"
+    }
+    deavtivateAddEdgeBtn(){
+        this._addEdgeBtn.style["opacity"] = "0"
+    }
+    addEdge(edge){
+        this._edge.push(edge)
+        this._edgeNum += 1
+    }
+    removeEdge(edge){
+        for (let i = 0; i <this._edgeNum; i++){
+            if (this._edge[i].getEdge() === edge.getEdge()){ //getEdge()  will give the svg line representing an edge
+                this._edge.splice(i,1)
+                this._edgeNum -= 1
+            }
+        }
+    }
+}
+
+class GraphNode extends NodeEdge{
+    constructor(x,y,id,canvas,radius,color,addEdgeBtn){
+        super(x,y,id,canvas,radius,color,addEdgeBtn)
+        this._active = false //true if the node has been clicked and the option to add an edge is available
+        this._canBeClicked = false //this will be used to validate the if a click can be considered a "quickClick"
+    }
+    _quickClickInterval(instance){
+        instance._canBeClicked = true
+        window.setTimeout(function(){
+            instance._canBeClicked = false
+        },100)
+    }
     nodeEventListenerPointer(pointer){
         var node = this._node
         var instance = this
-        this._node.addEventListener("click",function(event){
-            event.stopPropagation()
-            switch(pointer.getState()){
-                case pointer.eraseState():
-                    instance._canvas._canvas.removeChild(node)
-                    break
-                case pointer.edgeState():
-                    let edge = instance._canvas.getActiveEdge()
-                    let canAdd = instance._canAddEdge(edge)
-                    let node1 = instance._canvas.getSelectedNode()
-                    if (node1.getNode() != this && edge != null && canAdd){
-                        instance.addEdge(edge)
-                        edge.setSecondNode(instance)
-                        pointer.setDefaultState()
-                        instance._canvas.setEdge(null)
-                    }else if (!canAdd){
-                        edge.removeEdge()
-                    }
-            }
-        })
-        this._node.addEventListener("mousedown",function(event){
-            instance._quickClickInterval(instance)
-            switch(pointer.getState()){
-                case pointer.defaultState():
-                    node.style["cursor"] = "grabbing"
-
-                    break
-            }
-        })
+        this._clickListener(pointer,node,instance)
+        this._mouseDownListener(pointer,node,instance)
+        this._mouseUpListener(pointer,node,instance)
+        this._moveListener(pointer,node,instance)
+    }
+    _mouseUpListener(pointer,node,instance){
         this._node.addEventListener("mouseup",function(event){
             if (instance._canBeClicked === true){
                 //this if statement is made to catch only quick clicks
@@ -123,12 +141,47 @@ class Node{
                     break
             }
         })
-        this._nodeEventListener(pointer)
     }
-    _nodeEventListener(pointer){
-        let node = this._node
+    _mouseDownListener(pointer,node,instance){
+        this._node.addEventListener("mousedown",function(event){
+            instance._quickClickInterval(instance)
+            switch(pointer.getState()){
+                case pointer.defaultState():
+                    node.style["cursor"] = "grabbing"
+                    break
+            }
+        })
+    }
+    _clickListener(pointer,node,instance){
+        this._node.addEventListener("click",function(event){
+            event.stopPropagation()
+            switch(pointer.getState()){
+                case pointer.eraseState():
+                    let len = instance._edge.length
+                    let tempArr = instance._edge.slice()// i needed to copy the array since .removeEdge will need to traverse the existing array again
+                    for (let i = 0; i<len; i++){
+                        tempArr[i].removeEdge()
+                    }
+                    instance._canvas._canvas.removeChild(node)
+                    break
+                case pointer.edgeState():
+                    let edge = instance._canvas.getActiveEdge()
+                    let canAdd = instance._canAddEdge(edge)
+                    let node1 = instance._canvas.getSelectedNode()
+                    if (node1.getNode() != this && edge != null && canAdd){
+                        instance.addEdge(edge)
+                        
+                        edge.setSecondNode(instance)
+                        pointer.setDefaultState()
+                        instance._canvas.setEdge(null)
+                    }else if (!canAdd){
+                        edge.removeEdge()
+                    }
+            }
+        })
+    }
+    _moveListener(pointer,node,instance){
         let toolBarHeight = pointer.getToolBarHeight()
-        let instance = this
         node.addEventListener("mousemove",function(event){
             if (pointer.isDefaultState() && node.style["cursor"] === "grabbing"){
                 let newX = event.clientX
@@ -144,7 +197,7 @@ class Node{
                     instance._edge[i].updatePos(instance,newX,newY)
                 }
             }
-            else if (pointer.isEraseState() && node.style["cursor"] === "grab"){
+            else if (pointer.isEraseState() && (node.style["cursor"] === "grab" || node.style["cursor"] === "")){
                 
                 node.style["cursor"] = "none"
             }
@@ -188,36 +241,6 @@ class Node{
             this.deactivateNode()
         }else{
             this.activateNode()
-        }
-    }
-    initNode(){ 
-        this._node.setAttribute("r",this._radius)
-        this._node.setAttribute("cx",this._cx)
-        this._node.setAttribute("cy",this._cy)
-        this._node.setAttribute("fill",this._fill)
-        this._node.setAttribute("class","node")
-        this._node.id = `${this._id}`
-        return this._node
-    }
-    getNode(){
-        return this._node
-    }
-    activateAddEdgeBtn(){
-        this._addEdgeBtn.style["opacity"] = "1"
-    }
-    deavtivateAddEdgeBtn(){
-        this._addEdgeBtn.style["opacity"] = "0"
-    }
-    addEdge(edge){
-        this._edge.push(edge)
-        this._edgeNum += 1
-    }
-    removeEdge(edge){
-        for (let i = 0; i <this._edgeNum; i++){
-            if (this._edge[i].getEdge() === edge.getEdge()){ //getEdge()  will give the svg line representing an edge
-                this._edge.splice(i,1)
-                this._edgeNum -= 1
-            }
         }
     }
 }
