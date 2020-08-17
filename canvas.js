@@ -33,8 +33,8 @@ class Canvas{
         }
     }
     addEdge(edge){
-        this._canvas.insertAdjacentElement("afterbegin",edge.getMainGrp())
         this._svgDefs.appendChild(edge.getDefs())
+        this._canvas.insertAdjacentElement("afterbegin",edge.getMainGrp())
     }
     removeEdge(edge){
         this._canvas.removeChild(edge.getMainGrp())

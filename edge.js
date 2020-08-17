@@ -21,17 +21,23 @@ class Edge{
 class EdgeStack extends Edge{
     //this just needs to move with the black edge
     //need to set the clipping rectangle
+    //just need to update the coordinates of the rectangle when the edge moves 
     constructor(canvas,pointer,id){
         super(canvas,pointer,id)
         this._progEdge = document.createElementNS("http://www.w3.org/2000/svg","line")
         this._subGrp = document.createElementNS("http://www.w3.org/2000/svg","g")
-        this._rect = document.createElementNS("http://www.w3.org/2000/svg","line")
+        this._rect = document.createElementNS("http://www.w3.org/2000/svg","rect")
         this._mainGrp = document.createElementNS("http://www.w3.org/2000/svg","g")
         this._clipPath = document.createElementNS("http://www.w3.org/2000/svg","clipPath")
         this._initEdgeStack()
     }
     static _appendTo(parent,child){
         parent.appendChild(child)
+    }
+    static _getEdgeCoords(edge){
+        //edge is the dom node
+        //will return a list containing the four coordinates in the order: x1,y1,x2,y2 and they will be integers
+        return [parseInt(edge.getAttribute("x1"),10),parseInt(edge.getAttribute("y1"),10),parseInt(edge.getAttribute("x2"),10),parseInt(edge.getAttribute("y2"),10)]
     }
     _initEdgeStack(){
         this._initRect()//this is just an svg line
@@ -40,6 +46,9 @@ class EdgeStack extends Edge{
         this.updateNode1Endpoint(this._node1.getCx(),this._node1.getCy())
         this._initMainGrp()
         this._initDefs()
+        //=======================test=================
+        //this._progEdge1To2()
+        //=======================test end=============
     }
     _createProgEdge(){
         this._progEdge.setAttribute("stroke-width","7px")
@@ -56,34 +65,42 @@ class EdgeStack extends Edge{
         this._edge.setAttribute("y1",newY)
         this._progEdge.setAttribute("x1",newX)
         this._progEdge.setAttribute("y1",newY)
-        this._rect.setAttribute("x1",newX)
-        this._rect.setAttribute("y1",newY)
+        
     }
     updateNode2Endpoint(newX,newY){
         this._edge.setAttribute("x2",newX)
         this._edge.setAttribute("y2",newY)
         this._progEdge.setAttribute("x2",newX)
         this._progEdge.setAttribute("y2",newY)
-        this._rect.setAttribute("x2",newX)
-        this._rect.setAttribute("y2",newY)
+        this._updateRectCoord()
     }
-    _progEdge(){
+    _progEdge1To2(){
+        //this will prog the edge starting from node1 to node 2
         this._subGrp.setAttribute("clip-path",`url(#edge${this._id})`)
         let intervalId
         let instance = this
         const intervalCb = () =>{
-            let x = instance.getRectXCoord()
-            if ( x <= (parseInt(instance._cx,10) + parseInt(instance._radius,10))){
-                instance._rect.setAttribute("x",x+1)
-            }else{
-                
-                clearInterval(intervalId)
+            let x2 = parseInt(instance._edge.getAttribute("x2"))
+            let x1 = parseInt(instance._rect.getAttribute("x"))
+            if (x1 < x2){
+                instance._rect.setAttribute("x",`${x1+1}`)
             }
         }
         intervalId = setInterval(intervalCb,50)
     }
     _initRect(){
-        this._rect.setAttribute("stroke-width","7px")
+        this._rect.setAttribute("height","10000")
+        this._rect.setAttribute("y","0")
+    }
+    _updateRectCoord(){
+        let coordList = EdgeStack._getEdgeCoords(this._edge)
+        if (coordList[0] < coordList[2]){//need to ensure that the x coordinate of the rectangle is the left most node
+            this._rect.setAttribute("x",coordList[0])
+        }else{
+            this._rect.setAttribute("x",coordList[2])
+        }
+        let width = Math.abs(coordList[0]-coordList[2])//x1-x2
+        this._rect.setAttribute("width",width)
     }
     static getLineLength(x1,y1,x2,y2){
         let xComp = (x2-x1)*(x2-x1)
@@ -133,6 +150,7 @@ class EdgeGraph extends EdgeStack{
         this._node2 = newNode
         this.updateNode2Endpoint(newNode.getCx(),newNode.getCy())
         this._edge.classList.replace("edge-unclickable","edge-clickable")
+        this._progEdge1To2()
     }
     setFirstNode(newNode){
         this._node1 = newNode
