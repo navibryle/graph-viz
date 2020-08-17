@@ -79,7 +79,20 @@ class SecondNode extends Node{
         this.createSecondNode()
         this._rect = document.createElementNS("http://www.w3.org/2000/svg","rect")
         this._clipId = `node${this._id}`
-        this._subGrp = SecondNode._createGroup()
+        this._subGrp = document.createElementNS("http://www.w3.org/2000/svg","g")
+        this._clipPath = document.createElementNS("http://www.w3.org/2000/svg","clipPath")
+        this._mainGrp = document.createElementNS("http://www.w3.org/2000/svg","g")
+    }
+    //each of these statics will return the shapes they created
+    //====================================statics===========================
+    static _appendTo(parent,child){
+        parent.appendChild(child)
+    }
+    getNodeGrp(){
+        return this._mainGrp
+    }
+    getDef(){
+        return this._clipPath
     }
     createSecondNode(){
         this._secondNode.setAttribute("r",this._radius)
@@ -87,14 +100,6 @@ class SecondNode extends Node{
         this._secondNode.setAttribute("cy",this._cy)
         this._secondNode.setAttribute("fill",this._fill)
         this._secondNode.setAttribute("class","node")
-    }
-    //each of these statics will return the shapes they created
-    //====================================statics===========================
-    static _createGroup(){
-        return document.createElementNS("http://www.w3.org/2000/svg","g")
-    }
-    static _appendTo(parent,child){
-        parent.appendChild(child)
     }
     moveNode(newX,newY){
         this._firstNode.setAttribute("cx",newX)
@@ -122,7 +127,7 @@ class SecondNode extends Node{
     }
     //=====================================================
     _createClip(){
-        let clipPath = document.createElementNS("http://www.w3.org/2000/svg","clipPath")
+        let clipPath = this._clipPath
         clipPath.setAttribute("id",this._clipId)
         return clipPath
     }
@@ -152,7 +157,7 @@ class SecondNode extends Node{
         //this will return an svg grp with two childs the colored node and the black node surrounded by a group
         let coloredNode = this._secondNode
         let blackNode = this._firstNode
-        let mainGrp = SecondNode._createGroup()
+        let mainGrp = this._mainGrp
         let subGrp = this._subGrp
         SecondNode._appendTo(subGrp,blackNode)
         SecondNode._appendTo(mainGrp,coloredNode)
@@ -254,9 +259,10 @@ class GraphNode extends NodeEdge{
                     let len = instance._edge.length
                     let tempArr = instance._edge.slice()// i needed to copy the array since .removeEdge will need to traverse the existing array again
                     for (let i = 0; i<len; i++){
-                        tempArr[i].removeEdge()
+                        tempArr[i].removeEdge(instance)
                     }
-                    instance._canvas._canvas.removeChild(node)
+                    //instance._canvas._canvas.removeChild(node) need to change this so that node removal is done on the canvas object
+                    instance._canvas.removeNode(instance)
                     break
                 case pointer.edgeState():
                     let edge = instance._canvas.getActiveEdge()

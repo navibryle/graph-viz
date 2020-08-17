@@ -26,17 +26,24 @@ class EdgeStack extends Edge{
         this._progEdge = document.createElementNS("http://www.w3.org/2000/svg","line")
         this._subGrp = document.createElementNS("http://www.w3.org/2000/svg","g")
         this._rect = document.createElementNS("http://www.w3.org/2000/svg","line")
-        this._initRect()//this is just an svg line
-        this._createProgEdge()
-        this._createBlackEdge()
-        this.updateNode1Endpoint(this._node1.getCx(),this._node1.getCy())
+        this._mainGrp = document.createElementNS("http://www.w3.org/2000/svg","g")
+        this._clipPath = document.createElementNS("http://www.w3.org/2000/svg","clipPath")
+        this._initEdgeStack()
     }
     static _appendTo(parent,child){
         parent.appendChild(child)
     }
+    _initEdgeStack(){
+        this._initRect()//this is just an svg line
+        this._createProgEdge()
+        this._createBlackEdge()
+        this.updateNode1Endpoint(this._node1.getCx(),this._node1.getCy())
+        this._initMainGrp()
+        this._initDefs()
+    }
     _createProgEdge(){
         this._progEdge.setAttribute("stroke-width","7px")
-        this._progEdge.setAttribute("stroke","black")
+        this._progEdge.setAttribute("stroke","blue")
         this._edge.classList = "edge-unclickable edge"
     }
     _createBlackEdge(){
@@ -94,21 +101,24 @@ class EdgeStack extends Edge{
             this._node2.removeEdge(this)
         }
         this._node1.removeEdge(this)
-        this._canvas.getCanvas().removeChild(this._subGrp)
+        this._canvas.removeEdge(this)
+
+    }
+    _initMainGrp(){
+        EdgeStack._appendTo(this._subGrp,this._edge)
+        EdgeStack._appendTo(this._mainGrp,this._progEdge)
+        EdgeStack._appendTo(this._mainGrp,this._subGrp)
+        
+    }
+    _initDefs(){
+        this._clipPath.setAttribute("id",`edge${this._id}`)
+        EdgeStack._appendTo(this._clipPath,this._rect)
     }
     getMainGrp(){
-        let mainGrp = document.createElementNS("http://www.w3.org/2000/svg","g")
-        let subGrp = this._subGrp
-        EdgeStack._appendTo(subGrp,this._edge)
-        EdgeStack._appendTo(mainGrp,subGrp)
-        EdgeStack._appendTo(mainGrp,this._progEdge)
-        return mainGrp
+        return this._mainGrp
     }
     getDefs(){
-        let clipPath = document.createElementNS("http://www.w3.org/2000/svg","clipPath")
-        clipPath.setAttribute("id",`edge${this._id}`)
-        EdgeStack._appendTo(clipPath,this._rect)
-        return clipPath
+        return this._clipPath
     }
 }
 class EdgeGraph extends EdgeStack{

@@ -4,7 +4,7 @@ class Canvas{
     constructor(canvasId,pointer,defsId){
         //defs will contain the svg definition to be used for clipping
         this._size = 0
-        this._nodes = []//the id of each node in this list should be the same as its index
+        this._nodes = []//the id of each node in this list should be the same as its index. this will only keep track of the first node on the stack
         //the root will always be the first element in this list
         this._canvas = null
         this.checkCanvasId(canvasId)//will check if the canvas id is correct
@@ -20,11 +20,25 @@ class Canvas{
         this._nodes.push(node.getNode())
         this._svgDefs.appendChild(node.getSvgDef())//these svg definitions are needed to prog the node
         this._canvas.insertAdjacentElement("beforeend",node.getDynamicNode())
-        
+    }
+    removeNode(node){
+        this._size -= 1
+        this._canvas.removeChild(node.getNodeGrp())
+        this._svgDefs.removeChild(node.getDef())
+        let len = this._nodes.length
+        for (let i = 0; i < len; i++){
+            if (this._nodes[i] === node.getNode()){
+                this._nodes.splice(i,1)
+            }
+        }
     }
     addEdge(edge){
         this._canvas.insertAdjacentElement("afterbegin",edge.getMainGrp())
         this._svgDefs.appendChild(edge.getDefs())
+    }
+    removeEdge(edge){
+        this._canvas.removeChild(edge.getMainGrp())
+        this._svgDefs.removeChild(edge.getDefs())
     }
     clickedNode(node){
         if (this._selected === null){
