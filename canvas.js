@@ -18,9 +18,13 @@ class Canvas{
         //node must be of type Node
         this._size += 1
         this._nodes.push(node.getNode())
-        this._svgDefs.appendChild(node.getSvgDef())
+        this._svgDefs.appendChild(node.getSvgDef())//these svg definitions are needed to prog the node
         this._canvas.insertAdjacentElement("beforeend",node.getDynamicNode())
         
+    }
+    addEdge(edge){
+        this._canvas.insertAdjacentElement("afterbegin",edge.getMainGrp())
+        this._svgDefs.appendChild(edge.getDefs())
     }
     clickedNode(node){
         if (this._selected === null){
@@ -70,13 +74,13 @@ class Canvas{
         let instance = this
         let toolbarHeight = this._canvas.getBoundingClientRect().top
         let pointer = this._pointer
+        let count = 0
         this._canvas.addEventListener("mousemove",function(event){
             //need to set the initial state
             if (instance._edge === null && pointer.isEdgeState()){
-                instance._edge = new Edge(instance,pointer)
+                instance._edge = new EdgeGraph(instance,pointer,count)//this has an id now
+                count += 1
                 instance._selected.addEdge(instance._edge)
-                console.log(instance._selected._edge)
-
                 instance._edge.updateNode2Endpoint(event.clientX,0)
             }
             else if (pointer.isEdgeState()){

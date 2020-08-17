@@ -1,19 +1,12 @@
 class Edge{
-    constructor(canvas,pointer){
+    constructor(canvas,pointer,id){
         //init node is the which will be one of the endpoints of the edge
+        this._id = id
         this._node1 = canvas.getSelectedNode()//node1 is associated with the x1 and y1 coordinates
         this._node2 = null//node2 is associated with the x2 and y2 coordiantes
         this._edge = document.createElementNS("http://www.w3.org/2000/svg","line")
         this._canvas = canvas
-        this._pointer = pointer
-        this.initEdge()
-    }
-    initEdge(){
-        this.updateNode1Endpoint(this._node1.getCx(),this._node1.getCy())
-        this._edge.setAttribute("stroke-width","7px")
-        this._edge.setAttribute("stroke","black")
-        this._edge.classList = "edge-unclickable edge"
-        this._canvas._canvas.insertAdjacentElement("afterbegin",this._edge)
+        this._pointer = pointer   
     }
     getFirstNode(){
         return this._node1
@@ -24,19 +17,112 @@ class Edge{
     getEdge(){
         return this._edge
     }
+}
+class EdgeStack extends Edge{
+    //this just needs to move with the black edge
+    //need to set the clipping rectangle
+    constructor(canvas,pointer,id){
+        super(canvas,pointer,id)
+        this._progEdge = document.createElementNS("http://www.w3.org/2000/svg","line")
+        this._subGrp = document.createElementNS("http://www.w3.org/2000/svg","g")
+        this._rect = document.createElementNS("http://www.w3.org/2000/svg","line")
+        this._initRect()//this is just an svg line
+        this._createProgEdge()
+        this._createBlackEdge()
+        this.updateNode1Endpoint(this._node1.getCx(),this._node1.getCy())
+    }
+    static _appendTo(parent,child){
+        parent.appendChild(child)
+    }
+    _createProgEdge(){
+        this._progEdge.setAttribute("stroke-width","7px")
+        this._progEdge.setAttribute("stroke","black")
+        this._edge.classList = "edge-unclickable edge"
+    }
+    _createBlackEdge(){
+        this._edge.setAttribute("stroke-width","7px")
+        this._edge.setAttribute("stroke","black")
+        this._edge.classList = "edge-unclickable edge"
+    }
     updateNode1Endpoint(newX,newY){
         this._edge.setAttribute("x1",newX)
         this._edge.setAttribute("y1",newY)
+        this._progEdge.setAttribute("x1",newX)
+        this._progEdge.setAttribute("y1",newY)
+        this._rect.setAttribute("x1",newX)
+        this._rect.setAttribute("y1",newY)
     }
     updateNode2Endpoint(newX,newY){
         this._edge.setAttribute("x2",newX)
-        this._edge.setAttribute("y2",newY) 
+        this._edge.setAttribute("y2",newY)
+        this._progEdge.setAttribute("x2",newX)
+        this._progEdge.setAttribute("y2",newY)
+        this._rect.setAttribute("x2",newX)
+        this._rect.setAttribute("y2",newY)
+    }
+    _progEdge(){
+        this._subGrp.setAttribute("clip-path",`url(#edge${this._id})`)
+        let intervalId
+        let instance = this
+        const intervalCb = () =>{
+            let x = instance.getRectXCoord()
+            if ( x <= (parseInt(instance._cx,10) + parseInt(instance._radius,10))){
+                instance._rect.setAttribute("x",x+1)
+            }else{
+                
+                clearInterval(intervalId)
+            }
+        }
+        intervalId = setInterval(intervalCb,50)
+    }
+    _initRect(){
+        this._rect.setAttribute("stroke-width","7px")
+    }
+    static getLineLength(x1,y1,x2,y2){
+        let xComp = (x2-x1)*(x2-x1)
+        let yComp = (y2-y1)*(y2-y1)
+        let length = Math.sqrt(xComp + yComp)
+        return length
+    }
+    removeEdge(){
+        //this will remove the edge from the dom tree
+        if (this._canvas.getActiveEdge() === this){
+            this._canvas.setEdge(null)
+            this._pointer.setDefaultState()
+        }
+        if (this._node2 != null){
+            this._node2.removeEdge(this)
+        }
+        this._node1.removeEdge(this)
+        this._canvas.getCanvas().removeChild(this._subGrp)
+    }
+    getMainGrp(){
+        let mainGrp = document.createElementNS("http://www.w3.org/2000/svg","g")
+        let subGrp = this._subGrp
+        EdgeStack._appendTo(subGrp,this._edge)
+        EdgeStack._appendTo(mainGrp,subGrp)
+        EdgeStack._appendTo(mainGrp,this._progEdge)
+        return mainGrp
+    }
+    getDefs(){
+        let clipPath = document.createElementNS("http://www.w3.org/2000/svg","clipPath")
+        clipPath.setAttribute("id",`edge${this._id}`)
+        EdgeStack._appendTo(clipPath,this._rect)
+        return clipPath
+    }
+}
+class EdgeGraph extends EdgeStack{
+    //on creation the nodes to be appended onto the dom
+    //move the dom manipulation to canvas.js
+    constructor(canvas,pointer,id){
+        super(canvas,pointer,id)
+        this._eventListeners()//this might cause some bugs later on since an edge isnt clickable righ away
+        this._canvas.addEdge(this)//this will pass this instance onto 
     }
     setSecondNode(newNode){
         this._node2 = newNode
         this.updateNode2Endpoint(newNode.getCx(),newNode.getCy())
         this._edge.classList.replace("edge-unclickable","edge-clickable")
-        this._eventListeners()
     }
     setFirstNode(newNode){
         this._node1 = newNode
@@ -60,22 +146,5 @@ class Edge{
             }
         })
     }
-    removeEdge(){
-        //this will remove the edge from the dom tree
-        if (this._canvas.getActiveEdge() === this){
-            this._canvas.setEdge(null)
-            this._pointer.setDefaultState()
-        }
-        if (this._node2 != null){
-            this._node2.removeEdge(this)
-        }
-        this._node1.removeEdge(this)
-        this._canvas._canvas.removeChild(this._edge)
-    }
-    /*
-    addNodeEvent(node){
-        node.addEventListener("mousemove",function(){
-
-        })
-    }*/
+   
 }
