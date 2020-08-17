@@ -1,12 +1,14 @@
 class Node{
     constructor (x,y,id,canvas,radius,color){
         //x and y are the respective coordinates on which to place the node in the svg canvas
+        //first node will contain all the data needed for transformation and joining with edges
         this._id = id//id should count up from 0 to one.
         this._radius = radius.toString()
         this._cx = x//this will be the initial coordinate before the translation
         this._cy = y//this will be the initial coordinate before the translation
         this._fill = color
-        this._node = document.createElementNS("http://www.w3.org/2000/svg","circle")
+        this._firstNode = document.createElementNS("http://www.w3.org/2000/svg","circle")
+        this._initNode()
         this._canvas = canvas
     }
     getId(){
@@ -52,21 +54,112 @@ class Node{
             console.error(`invalid fill for node with id ${this._id}`)
         }
     }
-    initNode(){ 
-        this._node.setAttribute("r",this._radius)
-        this._node.setAttribute("cx",this._cx)
-        this._node.setAttribute("cy",this._cy)
-        this._node.setAttribute("fill",this._fill)
-        this._node.setAttribute("class","node")
-        this._node.id = `${this._id}`
-        return this._node
+    _initNode(){ 
+        this._firstNode.setAttribute("r",this._radius)
+        this._firstNode.setAttribute("cx",this._cx)
+        this._firstNode.setAttribute("cy",this._cy)
+        this._firstNode.setAttribute("fill","black")
+        this._firstNode.setAttribute("class","node")
+        this._firstNode.id = `${this._id}`
+        return this._firstNode
     }
     getNode(){
-        return this._node
+        return this._firstNode
     }
     
 }
-class NodeEdge extends Node{
+class SecondNode extends Node{
+    //all this node has to do is follow the black Node
+    //when black node is deleted delete this one too
+    //will contain the method to return the actual node
+    //gonna add access to defs here since this should be the one of the two programs which needs to access the defs
+    constructor(x,y,id,canvas,radius,color){
+        super(x,y,id,canvas,radius,color)
+        this._secondNode = document.createElementNS("http://www.w3.org/2000/svg","circle")
+        this.createSecondNode()
+        this._rect = document.createElementNS("http://www.w3.org/2000/svg","rect")
+        this._clipId = `node${this._id}`
+        this._subGrp = SecondNode._createGroup()
+    }
+    createSecondNode(){
+        this._secondNode.setAttribute("r",this._radius)
+        this._secondNode.setAttribute("cx",this._cx)
+        this._secondNode.setAttribute("cy",this._cy)
+        this._secondNode.setAttribute("fill",this._fill)
+        this._secondNode.setAttribute("class","node")
+    }
+    //each of these statics will return the shapes they created
+    //====================================statics===========================
+    static _createGroup(){
+        return document.createElementNS("http://www.w3.org/2000/svg","g")
+    }
+    static _appendTo(parent,child){
+        parent.appendChild(child)
+    }
+    moveNode(newX,newY){
+        this._firstNode.setAttribute("cx",newX)
+        this._firstNode.setAttribute("cy",newY)
+        this._secondNode.setAttribute("cx",newX)
+        this._secondNode.setAttribute("cy",newY)
+        this._cx = newX
+        this._cy = newY
+    }
+    _progNode(){
+        //this will make the node seem like its being progresed
+        this._subGrp.setAttribute("clip-path",`url(#node${this._id})`)
+        let intervalId
+        let instance = this
+        const intervalCb = () =>{
+            let x = instance.getRectXCoord()
+            if ( x <= (instance._cx + instance._radius)){
+                instance._rect.setAttribute("x",x+1)
+            }else{
+                clearInterval(intervalId)
+            }
+        }
+        intervalId = setInterval(intervalCb,300)
+    }
+    //=====================================================
+    _createClip(){
+        let clipPath = document.createElementNS("http://www.w3.org/2000/svg","clipPath")
+        clipPath.setAttribute("id",this._clipId)
+        return clipPath
+    }
+    initRect(){
+        this.updateRectCoords(this._cx-this._radius,this._cy-this._radius)
+        this._rect.setAttribute("width",this._radius * 2)
+        this._rect.setAttribute("height",this._radius * 2)
+    }
+    updateRectCoords(x,y){
+        //the x and the y needs to be the top right of the node
+        this._rect.setAttribute("x",x)
+        this._rect.setAttribute("y",y)
+    }
+    getRectXCoord(){
+        return parseInt(this._rect.getAttribute("x"),10)
+    }
+    getSvgDef(){
+        //clip path will be appended to defs
+        //this will return the clipPath svg elem that needs to be appended to defs
+        let clipPath = this._createClip()
+        this.initRect()
+        SecondNode._appendTo(clipPath,this._rect)
+        return clipPath
+    }
+    getDynamicNode(){
+        //clip path needs to be appended to defs
+        //this will return an svg grp with two childs the colored node and the black node surrounded by a group
+        let coloredNode = this._secondNode
+        let blackNode = this._firstNode
+        let mainGrp = SecondNode._createGroup()
+        let subGrp = this._subGrp
+        SecondNode._appendTo(subGrp,blackNode)
+        SecondNode._appendTo(mainGrp,coloredNode)
+        SecondNode._appendTo(mainGrp,subGrp)
+        return mainGrp
+    }
+}
+class NodeEdge extends SecondNode{
     constructor(x,y,id,canvas,radius,color,addEdgeBtn){
         super(x,y,id,canvas,radius,color)
         this._addEdgeBtn = document.getElementById(addEdgeBtn)
@@ -74,7 +167,7 @@ class NodeEdge extends Node{
         this._edgeNum = 0
     }
     _canAddEdge(edge){
-        let lenEdges = this._edge.length
+        let lenEdges = this._edge.length 
         let firstNode = edge.getFirstNode().getNode()
         for (let i = 0; i<lenEdges;i++){
             //second node of the edge parameters is this
@@ -117,7 +210,7 @@ class GraphNode extends NodeEdge{
         },100)
     }
     nodeEventListenerPointer(pointer){
-        var node = this._node
+        var node = this._firstNode
         var instance = this
         this._clickListener(pointer,node,instance)
         this._mouseDownListener(pointer,node,instance)
@@ -125,7 +218,7 @@ class GraphNode extends NodeEdge{
         this._moveListener(pointer,node,instance)
     }
     _mouseUpListener(pointer,node,instance){
-        this._node.addEventListener("mouseup",function(event){
+        this._firstNode.addEventListener("mouseup",function(event){
             if (instance._canBeClicked === true){
                 //this if statement is made to catch only quick clicks
                 if (pointer.isDefaultState() && !instance._active){
@@ -143,7 +236,7 @@ class GraphNode extends NodeEdge{
         })
     }
     _mouseDownListener(pointer,node,instance){
-        this._node.addEventListener("mousedown",function(event){
+        this._firstNode.addEventListener("mousedown",function(event){
             instance._quickClickInterval(instance)
             switch(pointer.getState()){
                 case pointer.defaultState():
@@ -153,7 +246,7 @@ class GraphNode extends NodeEdge{
         })
     }
     _clickListener(pointer,node,instance){
-        this._node.addEventListener("click",function(event){
+        this._firstNode.addEventListener("click",function(event){
             event.stopPropagation()
             switch(pointer.getState()){
                 case pointer.eraseState():
@@ -180,40 +273,49 @@ class GraphNode extends NodeEdge{
             }
         })
     }
-    _moveListener(pointer,node,instance){
+    _moveListener(pointer,firstNode,instance){
         let toolBarHeight = pointer.getToolBarHeight()
-        node.addEventListener("mousemove",function(event){
-            if (pointer.isDefaultState() && node.style["cursor"] === "grabbing"){
+        firstNode.addEventListener("mousemove",function(event){
+            if (pointer.isDefaultState() && firstNode.style["cursor"] === "grabbing"){
                 let newX = event.clientX
                 let newY = event.clientY - toolBarHeight
-                node.setAttribute("cx",newX)
-                node.setAttribute("cy",newY)
+                instance.moveNode(newX,newY)
+                /*
+                firstNode.setAttribute("cx",newX)
+                firstNode.setAttribute("cy",newY)
                 instance._cx = newX
                 instance._cy = newY
+                */
                 //need to pass the coordinated to the edge and have them move
                 for (let i = 0;i < instance._edgeNum; i++){
-                    //this loop will update the endpoint of all the nodes
-                    //this has to take O(n) time no matter what since we always have to update each node
+                    //this loop will update the endpoint of all the firstNodes
+                    //this has to take O(n) time no matter what since we always have to update each firstNode
                     instance._edge[i].updatePos(instance,newX,newY)
                 }
             }
-            else if (pointer.isEraseState() && (node.style["cursor"] === "grab" || node.style["cursor"] === "")){
+            else if (pointer.isEraseState() && (firstNode.style["cursor"] === "grab" || firstNode.style["cursor"] === "")){
                 
-                node.style["cursor"] = "none"
+                firstNode.style["cursor"] = "none"
             }
         })
         this._canvas._canvas.addEventListener("mousemove",function(event){
-            if (pointer.isDefaultState() && node.style["cursor"] === "grabbing"){
+            //this canvas event listener modifies the position of the firstNode
+            if (pointer.isDefaultState() && firstNode.style["cursor"] === "grabbing"){
                 let newX = event.clientX
                 let newY = event.clientY - toolBarHeight
-                node.setAttribute("cx",newX)
-                node.setAttribute("cy",newY)
+                instance.moveNode(newX,newY)
+                /*
+                let newX = event.clientX
+                let newY = event.clientY - toolBarHeight
+                firstNode.setAttribute("cx",newX)
+                firstNode.setAttribute("cy",newY)
                 instance._cx = newX
                 instance._cy = newY
+                */
                 //need to pass the coordinated to the edge and have them move
                 for (let i = 0;i < instance._edgeNum; i++){
-                    //this loop will update the endpoint of all the nodes
-                    //this has to take O(n) time no matter what since we always have to update each node
+                    //this loop will update the endpoint of all the firstNodes
+                    //this has to take O(n) time no matter what since we always have to update each firstNode
                     instance._edge[i].updatePos(instance,newX,newY)
                 }
             }
@@ -221,17 +323,17 @@ class GraphNode extends NodeEdge{
     }
     activateNode(){
         //node should only be activatable in default state
-        this._node.setAttribute("stroke","green")
-        this._node.setAttribute("stroke-dasharray","2")
-        this._node.setAttribute("stroke-width","3")
+        this._firstNode.setAttribute("stroke","green")
+        this._firstNode.setAttribute("stroke-dasharray","2")
+        this._firstNode.setAttribute("stroke-width","3")
         this._active = true
         this._canvas.setSelectedNode(this)
         this.activateAddEdgeBtn()
     }
     deactivateNode(){
-        this._node.setAttribute("stroke","")
-        this._node.setAttribute("stroke-dasharray","")
-        this._node.setAttribute("stroke-width","")
+        this._firstNode.setAttribute("stroke","")
+        this._firstNode.setAttribute("stroke-dasharray","")
+        this._firstNode.setAttribute("stroke-width","")
         this._active = false
         this.deavtivateAddEdgeBtn()
         this._canvas.deleteCurNode()

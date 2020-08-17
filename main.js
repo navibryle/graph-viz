@@ -41,9 +41,9 @@ function canvasNodeEventListener(pointer,id,canvas,toolbar){
                 let toolbarHeight = this.getBoundingClientRect().top
                 let xCoord = event.clientX+16//16 is to account for the offset of the pointer
                 let yCoord = event.clientY - toolbarHeight+16//16 is to account for the offset of the pointer
-                let newNode = new GraphNode(xCoord,yCoord,id.getIdIncrement(),canvas,15,"black","addEdge")
+                let newNode = new GraphNode(xCoord,yCoord,id.getIdIncrement(),canvas,15,"blue","addEdge")
                 newNode.nodeEventListenerPointer(pointer)
-                canvas.addNode(newNode.initNode())
+                canvas.addNode(newNode)
                 pointer.setDefaultState()
                 break
             case pointer.defaultState():
@@ -79,7 +79,7 @@ function main(){
     var btnIds = ["addNode","removeNode","randomNode","addEdge"]
     var pointer = new Pointer(addNodeSvg,delNodeSvg,"canvas","erase-cursor","toolbar")
     var id = new IdGen()
-    var canvas = new Canvas("canvas",pointer)
+    var canvas = new Canvas("canvas",pointer,"svgDefs")
     var toolbar = new Toolbar(btnIds)
     addNodeEventListener(pointer,toolbar)
     deleteNodeEventListener(pointer,toolbar)

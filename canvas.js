@@ -1,7 +1,8 @@
 class Canvas{
     //this class should represent the canvas
     //this class will collect all the nodes
-    constructor(canvasId,pointer){
+    constructor(canvasId,pointer,defsId){
+        //defs will contain the svg definition to be used for clipping
         this._size = 0
         this._nodes = []//the id of each node in this list should be the same as its index
         //the root will always be the first element in this list
@@ -10,13 +11,16 @@ class Canvas{
         this._selected = null
         this._edge = null
         this._pointer = pointer
+        this._svgDefs = document.getElementById(defsId)
     }
     addNode(node){
         //this will add node to the canvas
         //node must be of type Node
         this._size += 1
-        this._nodes.push(node)
-        this._canvas.insertAdjacentElement("beforeend",node)
+        this._nodes.push(node.getNode())
+        this._svgDefs.appendChild(node.getSvgDef())
+        this._canvas.insertAdjacentElement("beforeend",node.getDynamicNode())
+        
     }
     clickedNode(node){
         if (this._selected === null){
