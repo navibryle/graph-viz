@@ -111,13 +111,14 @@ class SecondNode extends Node{
         let instance = this
         const intervalCb = () =>{
             let x = instance.getRectXCoord()
-            if ( x <= (instance._cx + instance._radius)){
+            if ( x <= (parseInt(instance._cx,10) + parseInt(instance._radius,10))){
                 instance._rect.setAttribute("x",x+1)
             }else{
+                
                 clearInterval(intervalId)
             }
         }
-        intervalId = setInterval(intervalCb,300)
+        intervalId = setInterval(intervalCb,50)
     }
     //=====================================================
     _createClip(){
@@ -280,12 +281,6 @@ class GraphNode extends NodeEdge{
                 let newX = event.clientX
                 let newY = event.clientY - toolBarHeight
                 instance.moveNode(newX,newY)
-                /*
-                firstNode.setAttribute("cx",newX)
-                firstNode.setAttribute("cy",newY)
-                instance._cx = newX
-                instance._cy = newY
-                */
                 //need to pass the coordinated to the edge and have them move
                 for (let i = 0;i < instance._edgeNum; i++){
                     //this loop will update the endpoint of all the firstNodes
@@ -304,14 +299,6 @@ class GraphNode extends NodeEdge{
                 let newX = event.clientX
                 let newY = event.clientY - toolBarHeight
                 instance.moveNode(newX,newY)
-                /*
-                let newX = event.clientX
-                let newY = event.clientY - toolBarHeight
-                firstNode.setAttribute("cx",newX)
-                firstNode.setAttribute("cy",newY)
-                instance._cx = newX
-                instance._cy = newY
-                */
                 //need to pass the coordinated to the edge and have them move
                 for (let i = 0;i < instance._edgeNum; i++){
                     //this loop will update the endpoint of all the firstNodes
