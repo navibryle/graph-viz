@@ -109,22 +109,6 @@ class SecondNode extends Node{
         this._cx = newX
         this._cy = newY
     }
-    _progNode(){
-        //this will make the node seem like its being progresed
-        this._subGrp.setAttribute("clip-path",`url(#node${this._id})`)
-        let intervalId
-        let instance = this
-        const intervalCb = () =>{
-            let x = instance.getRectXCoord()
-            if ( x <= (parseInt(instance._cx,10) + parseInt(instance._radius,10))){
-                instance._rect.setAttribute("x",x+1)
-            }else{
-                
-                clearInterval(intervalId)
-            }
-        }
-        intervalId = setInterval(intervalCb,50)
-    }
     //=====================================================
     _createClip(){
         let clipPath = this._clipPath
@@ -143,6 +127,9 @@ class SecondNode extends Node{
     }
     getRectXCoord(){
         return parseInt(this._rect.getAttribute("x"),10)
+    }
+    getRectYCoord(){
+        return parseInt(this._rect.getAttribute("y"),10)
     }
     getSvgDef(){
         //clip path will be appended to defs
@@ -165,7 +152,74 @@ class SecondNode extends Node{
         return mainGrp
     }
 }
-class NodeEdge extends SecondNode{
+class NodeProg extends SecondNode{
+    //will be progging node in cardinal directions
+    constructor (x,y,id,canvas,radius,color){
+        super(x,y,id,canvas,radius,color)
+    }
+    _progEast(){
+        //this will make the node seem like its being progresed
+        this._subGrp.setAttribute("clip-path",`url(#node${this._id})`)
+        let intervalId
+        let instance = this
+        const intervalCb = () =>{
+            let x = instance.getRectXCoord()
+            if ( x <= (parseInt(instance._cx,10) + parseInt(instance._radius,10))){
+                instance._rect.setAttribute("x",x+1)
+            }else{
+                
+                clearInterval(intervalId)
+            }
+        }
+        intervalId = setInterval(intervalCb,50)
+    }
+    _progWest(){
+        this._subGrp.setAttribute("clip-path",`url(#node${this._id})`)
+        let intervalId
+        let instance = this
+        const intervalCb = () =>{
+            let x = instance.getRectXCoord()
+            if ( x >= (parseInt(instance._cx,10) - (3*parseInt(instance._radius,10)))){
+                instance._rect.setAttribute("x",x-1)
+            }else{
+                
+                clearInterval(intervalId)
+            }
+        }
+        intervalId = setInterval(intervalCb,50)
+    }
+    _progNorth(){
+        this._subGrp.setAttribute("clip-path",`url(#node${this._id})`)
+        let intervalId
+        let instance = this
+        const intervalCb = () =>{
+            let y = instance.getRectYCoord()
+            if ( y >= (parseInt(instance._cy,10) - (3*parseInt(instance._radius,10)))){
+                instance._rect.setAttribute("y",y-1)
+            }else{
+                
+                clearInterval(intervalId)
+            }
+        }
+        intervalId = setInterval(intervalCb,50)
+    }
+    _progSouth(){
+        this._subGrp.setAttribute("clip-path",`url(#node${this._id})`)
+        let intervalId
+        let instance = this
+        const intervalCb = () =>{
+            let y = instance.getRectYCoord()
+            if ( y <= (parseInt(instance._cy,10) + (parseInt(instance._radius,10)))){
+                instance._rect.setAttribute("y",y+1)
+            }else{
+                
+                clearInterval(intervalId)
+            }
+        }
+        intervalId = setInterval(intervalCb,50)
+    }
+}
+class NodeEdge extends NodeProg{
     constructor(x,y,id,canvas,radius,color,addEdgeBtn){
         super(x,y,id,canvas,radius,color)
         this._addEdgeBtn = document.getElementById(addEdgeBtn)
@@ -208,6 +262,7 @@ class GraphNode extends NodeEdge{
         super(x,y,id,canvas,radius,color,addEdgeBtn)
         this._active = false //true if the node has been clicked and the option to add an edge is available
         this._canBeClicked = false //this will be used to validate the if a click can be considered a "quickClick"
+        this._progSouth()
     }
     _quickClickInterval(instance){
         instance._canBeClicked = true
