@@ -132,7 +132,7 @@ class EdgeProg extends EdgeStack{
     constructor(canvas,pointer,id){
         super(canvas,pointer,id)
     }
-    _progEdgeRightToLeft(){
+    _progEdgeLeftToRight(){
         //this will prog the edge starting from node1 to node 2
         this._subGrp.setAttribute("clip-path",`url(#edge${this._id})`)
         let intervalId
@@ -149,7 +149,7 @@ class EdgeProg extends EdgeStack{
         }
         intervalId = setInterval(intervalCb,50)
     }
-    _progEdgeLeftToRight(){
+    _progEdgeRightToLeft(){
         //this will prog the edge starting from node1 to node
         //this will prog the edge starting from node1 to node 2
         this._subGrp.setAttribute("clip-path",`url(#edge${this._id})`)
@@ -166,8 +166,17 @@ class EdgeProg extends EdgeStack{
         }
         intervalId = setInterval(intervalCb,50)
     }
+    progEdgeFromNode(node){
+        if (node === this._leftMost){
+            this._progEdgeLeftToRight()
+        }else if (node === this._rightMost){
+            this._progEdgeRightToLeft()
+        }else{
+            console.error("edge is not connected to node")
+        }
+    }
 }
-class EdgeGraph extends EdgeProg{
+class EdgeGraph extends EdgeProg{ 
     //on creation the nodes to be appended onto the dom
     //move the dom manipulation to canvas.js
     constructor(canvas,pointer,id){
@@ -180,7 +189,7 @@ class EdgeGraph extends EdgeProg{
         this._node2 = newNode
         this.updateNode2Endpoint(newNode.getCx(),newNode.getCy())
         this._edge.classList.replace("edge-unclickable","edge-clickable")
-        this._progEdgeLeftToRight()
+        this.progEdgeFromNode(this._node2)
     }
     setFirstNode(newNode){
         this._node1 = newNode
