@@ -29,6 +29,8 @@ class EdgeStack extends Edge{
         this._rect = document.createElementNS("http://www.w3.org/2000/svg","rect")
         this._mainGrp = document.createElementNS("http://www.w3.org/2000/svg","g")
         this._clipPath = document.createElementNS("http://www.w3.org/2000/svg","clipPath")
+        this._rightMost = null//this will keep track of the right most node
+        this._leftMost = null
         this._initEdgeStack()
     }
     static _appendTo(parent,child){
@@ -46,9 +48,6 @@ class EdgeStack extends Edge{
         this.updateNode1Endpoint(this._node1.getCx(),this._node1.getCy())
         this._initMainGrp()
         this._initDefs()
-        //=======================test=================
-        //this._progEdge1To2()
-        //=======================test end=============
     }
     _createProgEdge(){
         this._progEdge.setAttribute("stroke-width","7px")
@@ -74,20 +73,7 @@ class EdgeStack extends Edge{
         this._progEdge.setAttribute("y2",newY)
         this._updateRectCoord()
     }
-    _progEdge1To2(){
-        //this will prog the edge starting from node1 to node 2
-        this._subGrp.setAttribute("clip-path",`url(#edge${this._id})`)
-        let intervalId
-        let instance = this
-        const intervalCb = () =>{
-            let x2 = parseInt(instance._edge.getAttribute("x2"))
-            let x1 = parseInt(instance._rect.getAttribute("x"))
-            if (x1 < x2){
-                instance._rect.setAttribute("x",`${x1+1}`)
-            }
-        }
-        intervalId = setInterval(intervalCb,50)
-    }
+    
     _initRect(){
         this._rect.setAttribute("height","10000")
         this._rect.setAttribute("y","0")
@@ -96,8 +82,12 @@ class EdgeStack extends Edge{
         let coordList = EdgeStack._getEdgeCoords(this._edge)
         if (coordList[0] < coordList[2]){//need to ensure that the x coordinate of the rectangle is the left most node
             this._rect.setAttribute("x",coordList[0])
+            this._rightMost = this._node2
+            this._leftMost = this._node1
         }else{
             this._rect.setAttribute("x",coordList[2])
+            this._rightMost = this._node1
+            this._leftMost = this._node2
         }
         let width = Math.abs(coordList[0]-coordList[2])//x1-x2
         this._rect.setAttribute("width",width)
@@ -138,19 +128,59 @@ class EdgeStack extends Edge{
         return this._clipPath
     }
 }
-class EdgeGraph extends EdgeStack{
+class EdgeProg extends EdgeStack{
+    constructor(canvas,pointer,id){
+        super(canvas,pointer,id)
+    }
+    _progEdgeRightToLeft(){
+        //this will prog the edge starting from node1 to node 2
+        this._subGrp.setAttribute("clip-path",`url(#edge${this._id})`)
+        let intervalId
+        let instance = this
+        let x2 = parseInt(instance._rightMost._cx,10)
+        const intervalCb = () =>{
+            
+            let x1 = parseInt(instance._rect.getAttribute("x"),10)
+            if (x1 < x2){
+                instance._rect.setAttribute("x",`${x1+1}`)
+            }else{
+                clearInterval(intervalId)
+            }
+        }
+        intervalId = setInterval(intervalCb,50)
+    }
+    _progEdgeLeftToRight(){
+        //this will prog the edge starting from node1 to node
+        //this will prog the edge starting from node1 to node 2
+        this._subGrp.setAttribute("clip-path",`url(#edge${this._id})`)
+        let intervalId
+        let instance = this
+        let cap = parseInt(instance._rect.getAttribute("x"),10) - parseInt(instance._rect.getAttribute("width"),10)
+        const intervalCb = () =>{
+            let x = parseInt(instance._rect.getAttribute("x"),10)
+            if (x >= cap){
+                instance._rect.setAttribute("x",`${x-1}`)
+            }else{
+                clearInterval(intervalId)
+            }
+        }
+        intervalId = setInterval(intervalCb,50)
+    }
+}
+class EdgeGraph extends EdgeProg{
     //on creation the nodes to be appended onto the dom
     //move the dom manipulation to canvas.js
     constructor(canvas,pointer,id){
         super(canvas,pointer,id)
         this._eventListeners()//this might cause some bugs later on since an edge isnt clickable righ away
-        this._canvas.addEdge(this)//this will pass this instance onto 
+        this._canvas.addEdge(this)//this will pass this instance onto
+        
     }
     setSecondNode(newNode){
         this._node2 = newNode
         this.updateNode2Endpoint(newNode.getCx(),newNode.getCy())
         this._edge.classList.replace("edge-unclickable","edge-clickable")
-        this._progEdge1To2()
+        this._progEdgeLeftToRight()
     }
     setFirstNode(newNode){
         this._node1 = newNode
