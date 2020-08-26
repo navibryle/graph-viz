@@ -157,7 +157,7 @@ class NodeProg extends SecondNode{
     constructor (x,y,id,canvas,radius,color){
         super(x,y,id,canvas,radius,color)
     }
-    _progEast(){
+    progEast(){
         //this will make the node seem like its being progresed
         this._subGrp.setAttribute("clip-path",`url(#node${this._id})`)
         let intervalId
@@ -173,7 +173,7 @@ class NodeProg extends SecondNode{
         }
         intervalId = setInterval(intervalCb,50)
     }
-    _progWest(){
+    progWest(){
         this._subGrp.setAttribute("clip-path",`url(#node${this._id})`)
         let intervalId
         let instance = this
@@ -188,7 +188,7 @@ class NodeProg extends SecondNode{
         }
         intervalId = setInterval(intervalCb,50)
     }
-    _progNorth(){
+    progNorth(){
         this._subGrp.setAttribute("clip-path",`url(#node${this._id})`)
         let intervalId
         let instance = this
@@ -203,7 +203,7 @@ class NodeProg extends SecondNode{
         }
         intervalId = setInterval(intervalCb,50)
     }
-    _progSouth(){
+    progSouth(){
         this._subGrp.setAttribute("clip-path",`url(#node${this._id})`)
         let intervalId
         let instance = this
@@ -262,7 +262,6 @@ class GraphNode extends NodeEdge{
         super(x,y,id,canvas,radius,color,addEdgeBtn)
         this._active = false //true if the node has been clicked and the option to add an edge is available
         this._canBeClicked = false //this will be used to validate the if a click can be considered a "quickClick"
-        this._progSouth()
     }
     _quickClickInterval(instance){
         instance._canBeClicked = true

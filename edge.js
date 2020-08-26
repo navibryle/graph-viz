@@ -6,7 +6,11 @@ class Edge{
         this._node2 = null//node2 is associated with the x2 and y2 coordiantes
         this._edge = document.createElementNS("http://www.w3.org/2000/svg","line")
         this._canvas = canvas
-        this._pointer = pointer   
+        this._pointer = pointer  
+        this._rightMost = null//this will keep track of the right most node
+        this._leftMost = null
+        this._topMost = null
+        this._bottomMost = null
     }
     getFirstNode(){
         return this._node1
@@ -17,6 +21,27 @@ class Edge{
     getEdge(){
         return this._edge
     }
+    _setEndOrientation(){
+        if (this._node1 != null && this._node2 != null){
+            if (this._node1.getCx() > this._node2.getCx()){
+                this._leftMost = this._node2
+                this._rightMost = this._node1
+            }else{
+                this._leftMost = this._node1
+                this._rightMost = this._node2
+            }
+            if (this._node1.getCy() > this._node2.getCy()){
+                this._topMost = this._node2
+                this._bottomMost = this._node1
+            }else{
+                this._topMost = this._node1
+                this._bottomMost = this._node2
+            }
+        }
+        else{
+            console.error("orientation cant be set since node 2 is still not set")
+        }
+    }
 }
 class EdgeStack extends Edge{
     //this just needs to move with the black edge
@@ -26,11 +51,7 @@ class EdgeStack extends Edge{
         super(canvas,pointer,id)
         this._progEdge = document.createElementNS("http://www.w3.org/2000/svg","line")
         this._subGrp = document.createElementNS("http://www.w3.org/2000/svg","g")
-        this._rect = document.createElementNS("http://www.w3.org/2000/svg","rect")
         this._mainGrp = document.createElementNS("http://www.w3.org/2000/svg","g")
-        this._clipPath = document.createElementNS("http://www.w3.org/2000/svg","clipPath")
-        this._rightMost = null//this will keep track of the right most node
-        this._leftMost = null
         this._initEdgeStack()
     }
     static _appendTo(parent,child){
@@ -42,12 +63,10 @@ class EdgeStack extends Edge{
         return [parseInt(edge.getAttribute("x1"),10),parseInt(edge.getAttribute("y1"),10),parseInt(edge.getAttribute("x2"),10),parseInt(edge.getAttribute("y2"),10)]
     }
     _initEdgeStack(){
-        this._initRect()//this is just an svg line
         this._createProgEdge()
         this._createBlackEdge()
         this.updateNode1Endpoint(this._node1.getCx(),this._node1.getCy())
         this._initMainGrp()
-        this._initDefs()
     }
     _createProgEdge(){
         this._progEdge.setAttribute("stroke-width","7px")
@@ -58,45 +77,6 @@ class EdgeStack extends Edge{
         this._edge.setAttribute("stroke-width","7px")
         this._edge.setAttribute("stroke","black")
         this._edge.classList = "edge-unclickable edge"
-    }
-    updateNode1Endpoint(newX,newY){
-        this._edge.setAttribute("x1",newX)
-        this._edge.setAttribute("y1",newY)
-        this._progEdge.setAttribute("x1",newX)
-        this._progEdge.setAttribute("y1",newY)
-        
-    }
-    updateNode2Endpoint(newX,newY){
-        this._edge.setAttribute("x2",newX)
-        this._edge.setAttribute("y2",newY)
-        this._progEdge.setAttribute("x2",newX)
-        this._progEdge.setAttribute("y2",newY)
-        this._updateRectCoord()
-    }
-    
-    _initRect(){
-        this._rect.setAttribute("height","10000")
-        this._rect.setAttribute("y","0")
-    }
-    _updateRectCoord(){
-        let coordList = EdgeStack._getEdgeCoords(this._edge)
-        if (coordList[0] < coordList[2]){//need to ensure that the x coordinate of the rectangle is the left most node
-            this._rect.setAttribute("x",coordList[0])
-            this._rightMost = this._node2
-            this._leftMost = this._node1
-        }else{
-            this._rect.setAttribute("x",coordList[2])
-            this._rightMost = this._node1
-            this._leftMost = this._node2
-        }
-        let width = Math.abs(coordList[0]-coordList[2])//x1-x2
-        this._rect.setAttribute("width",width)
-    }
-    static getLineLength(x1,y1,x2,y2){
-        let xComp = (x2-x1)*(x2-x1)
-        let yComp = (y2-y1)*(y2-y1)
-        let length = Math.sqrt(xComp + yComp)
-        return length
     }
     removeEdge(){
         //this will remove the edge from the dom tree
@@ -109,37 +89,123 @@ class EdgeStack extends Edge{
         }
         this._node1.removeEdge(this)
         this._canvas.removeEdge(this)
-
     }
     _initMainGrp(){
         EdgeStack._appendTo(this._subGrp,this._edge)
         EdgeStack._appendTo(this._mainGrp,this._progEdge)
         EdgeStack._appendTo(this._mainGrp,this._subGrp)
-        
-    }
-    _initDefs(){
-        this._clipPath.setAttribute("id",`edge${this._id}`)
-        EdgeStack._appendTo(this._clipPath,this._rect)
     }
     getMainGrp(){
         return this._mainGrp
-    }
-    getDefs(){
-        return this._clipPath
     }
 }
 class EdgeProg extends EdgeStack{
     constructor(canvas,pointer,id){
         super(canvas,pointer,id)
+        this._rect = document.createElementNS("http://www.w3.org/2000/svg","polygon")
+        this._clipPath = document.createElementNS("http://www.w3.org/2000/svg","clipPath")
+        this._rectP1 = {x:this._node1.getCx(),y:this._node1.getCy()}
+        this._rectP2 = {x:null,y:null}
+        this._rectP3 = {x:null,y:null}
+        this._rectP4 = {x:null,y:null}
+        this._initDefs()
+    }
+    static _appendTo(parent,child){
+        parent.appendChild(child)
+    }
+    _initDefs(){
+        this._clipPath.setAttribute("id",`edge${this._id}`)
+        EdgeProg._appendTo(this._clipPath,this._rect)
+    }
+    getDefs(){
+        return this._clipPath
+    }
+    static _pointIsNull(point){
+        //point object needs to have an x and y component
+        return point.x === null && point.y === null
+    }
+    _pointsAreNull(){
+        return EdgeProg._pointIsNull(this._rectP2) && EdgeProg._pointIsNull(this._rectP3) && EdgeProg._pointIsNull(this._rectP4)
+    }
+    _initP2P4(){
+        let x1 = this._rectP1.x
+        let y1 = this._rectP1.y
+        let x2 = this._rectP3.x
+        let y2 = this._rectP3.y
+        let xDelta = x1 - x2
+        let yDelta = y1 - y2
+        this._initP2(x1,y2,xDelta,yDelta)
+        this._initP4(x2,y1,xDelta,yDelta)
+    }
+    _initP2(x1,y2,xDelta,yDelta){
+        //this function will update both the x and y coordinate of this._rect
+        
+        if (Math.abs(xDelta) <= 20){
+            console.log("here")
+            if (xDelta >= 0){
+                this._rectP2.x = x1 + 50
+            }else{
+                this._rectP2.x = x1 - 50
+            }
+        }else{
+            this._rectP2.x = x1
+        }
+        if (Math.abs(yDelta) <= 20){
+            console.log("here")
+
+            if (yDelta >= 0){
+                this._rectP2.y = y2 - 50
+            }else{
+                this._rectP2.y = y2 + 50
+            }
+        }else{
+            this._rectP2.y = y2
+        }
+    }
+    _initP4(x2,y1,xDelta,yDelta){
+        //this function will update both the x and y coordinate of p2
+        if (Math.abs(xDelta) <= 20){
+            console.log("here")
+            if (xDelta >= 0){
+                this._rectP4.x = x2 - 50
+            }else{
+                this._rectP4.x = x2 + 50
+            }
+        }else{
+            this._rectP4.x = x2
+        }
+        if (Math.abs(yDelta) <= 20){
+            console.log("here")
+            if (yDelta >= 0){
+                this._rectP4.y = y1 + 50
+            }else{
+                this._rectP4.y = y1 - 50
+            }
+        }else{
+            this._rectP4.y = y1
+        }
+    }
+    _initRectCoord(){
+        //this should only ever be called once when the second node is set
+        if (this._pointsAreNull()){
+            this._rectP3.x = this._node2.getCx()
+            this._rectP3.y = this._node2.getCy()
+            this._initP2P4()
+        }
+    }
+    static getLineLength(x1,y1,x2,y2){
+        let xComp = (x2-x1)*(x2-x1)
+        let yComp = (y2-y1)*(y2-y1)
+        let length = Math.sqrt(xComp + yComp)
+        return length
     }
     _progEdgeLeftToRight(){
         //this will prog the edge starting from node1 to node 2
         this._subGrp.setAttribute("clip-path",`url(#edge${this._id})`)
         let intervalId
         let instance = this
-        let x2 = parseInt(instance._rightMost._cx,10)
+        let x2 = parseInt(instance._rightMost.getCx(),10)
         const intervalCb = () =>{
-            
             let x1 = parseInt(instance._rect.getAttribute("x"),10)
             if (x1 < x2){
                 instance._rect.setAttribute("x",`${x1+1}`)
@@ -175,6 +241,18 @@ class EdgeProg extends EdgeStack{
             console.error("edge is not connected to node")
         }
     }
+    _displayPoint(point){
+        //this will neatly display the point x and y in as a comma seperated integer
+        return `${point.x},${point.y}`
+    }
+    //==============================test method==============================
+    _test(){
+        let poly = document.createElementNS("http://www.w3.org/2000/svg","polygon")
+        let parent = document.getElementById("canvas")
+        poly.setAttribute("fill","green")
+        poly.setAttribute("points",`${this._displayPoint(this._rectP1)} ${this._displayPoint(this._rectP2)} ${this._displayPoint(this._rectP3)} ${this._displayPoint(this._rectP4)}`)
+        parent.appendChild(poly)
+    }
 }
 class EdgeGraph extends EdgeProg{ 
     //on creation the nodes to be appended onto the dom
@@ -189,11 +267,26 @@ class EdgeGraph extends EdgeProg{
         this._node2 = newNode
         this.updateNode2Endpoint(newNode.getCx(),newNode.getCy())
         this._edge.classList.replace("edge-unclickable","edge-clickable")
-        this.progEdgeFromNode(this._node2)
+        this._setEndOrientation()
+        this._initRectCoord()
+        this._test()
     }
     setFirstNode(newNode){
         this._node1 = newNode
         this.updateNode1Endpoint(newNode.getCx(),newNode.getCy())
+    }
+    updateNode1Endpoint(newX,newY){
+        this._edge.setAttribute("x1",newX)
+        this._edge.setAttribute("y1",newY)
+        this._progEdge.setAttribute("x1",newX)
+        this._progEdge.setAttribute("y1",newY)   
+    }
+    updateNode2Endpoint(newX,newY){
+        this._edge.setAttribute("x2",newX)
+        this._edge.setAttribute("y2",newY)
+        this._progEdge.setAttribute("x2",newX)
+        this._progEdge.setAttribute("y2",newY)
+        
     }
     updatePos(node,newX,newY){
         //node is the node that is being moved
@@ -201,6 +294,7 @@ class EdgeGraph extends EdgeProg{
             this.updateNode1Endpoint(newX,newY)
         }else if (node === this._node2){
             this.updateNode2Endpoint(newX,newY)
+            
         }
     }
     _eventListeners(){
@@ -213,5 +307,4 @@ class EdgeGraph extends EdgeProg{
             }
         })
     }
-   
 }
