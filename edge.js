@@ -21,6 +21,18 @@ class Edge{
     getEdge(){
         return this._edge
     }
+    getX1(){
+        return this._edge.getAttribute("x1")
+    }
+    getY1(){
+        return this._edge.getAttribute("y1")
+    }
+    getX2(){
+        return this._edge.getAttribute("x2")
+    }
+    getY2(){
+        return this._edge.getAttribute("y2")
+    }
     _setEndOrientation(){
         if (this._node1 != null && this._node2 != null){
             if (this._node1.getCx() > this._node2.getCx()){
@@ -104,9 +116,9 @@ class EdgeProg extends EdgeStack{
         super(canvas,pointer,id)
         this._rect = document.createElementNS("http://www.w3.org/2000/svg","polygon")
         this._clipPath = document.createElementNS("http://www.w3.org/2000/svg","clipPath")
-        this._rectP1 = {x:this._node1.getCx(),y:this._node1.getCy()}
+        this._rectP1 = {x:this.getX1(),y:this.getY1()}
         this._rectP2 = {x:null,y:null}
-        this._rectP3 = {x:null,y:null}
+        this._rectP3 = {x:this.getX2(),y:this.getY2()}
         this._rectP4 = {x:null,y:null}
         this._initDefs()
     }
@@ -127,21 +139,20 @@ class EdgeProg extends EdgeStack{
     _pointsAreNull(){
         return EdgeProg._pointIsNull(this._rectP2) && EdgeProg._pointIsNull(this._rectP3) && EdgeProg._pointIsNull(this._rectP4)
     }
-    _initP2P4(){
-        let x1 = this._rectP1.x
-        let y1 = this._rectP1.y
-        let x2 = this._rectP3.x
-        let y2 = this._rectP3.y
+    _updateP2P4(){
+        let x1 = parseInt(this._rectP1.x,10)
+        let y1 = parseInt(this._rectP1.y,10)
+        let x2 = parseInt(this._rectP3.x,10)
+        let y2 = parseInt(this._rectP3.y,10)
         let xDelta = x1 - x2
         let yDelta = y1 - y2
-        this._initP2(x1,y2,xDelta,yDelta)
-        this._initP4(x2,y1,xDelta,yDelta)
+        console.log(x1,y1,x2,y2)
+        this._updateP2(x1,y2,xDelta,yDelta)
+        this._updateP4(x2,y1,xDelta,yDelta)
     }
-    _initP2(x1,y2,xDelta,yDelta){
+    _updateP2(x1,y2,xDelta,yDelta){
         //this function will update both the x and y coordinate of this._rect
-        
-        if (Math.abs(xDelta) <= 20){
-            console.log("here")
+        if (Math.abs(xDelta) <= 50){
             if (xDelta >= 0){
                 this._rectP2.x = x1 + 50
             }else{
@@ -150,9 +161,7 @@ class EdgeProg extends EdgeStack{
         }else{
             this._rectP2.x = x1
         }
-        if (Math.abs(yDelta) <= 20){
-            console.log("here")
-
+        if (Math.abs(yDelta) <= 50){
             if (yDelta >= 0){
                 this._rectP2.y = y2 - 50
             }else{
@@ -162,10 +171,14 @@ class EdgeProg extends EdgeStack{
             this._rectP2.y = y2
         }
     }
-    _initP4(x2,y1,xDelta,yDelta){
+    test(inp,where){
+        if (inp > 1000){
+            console.log(where)
+        }
+    }
+    _updateP4(x2,y1,xDelta,yDelta){
         //this function will update both the x and y coordinate of p2
         if (Math.abs(xDelta) <= 20){
-            console.log("here")
             if (xDelta >= 0){
                 this._rectP4.x = x2 - 50
             }else{
@@ -175,7 +188,6 @@ class EdgeProg extends EdgeStack{
             this._rectP4.x = x2
         }
         if (Math.abs(yDelta) <= 20){
-            console.log("here")
             if (yDelta >= 0){
                 this._rectP4.y = y1 + 50
             }else{
@@ -188,9 +200,7 @@ class EdgeProg extends EdgeStack{
     _initRectCoord(){
         //this should only ever be called once when the second node is set
         if (this._pointsAreNull()){
-            this._rectP3.x = this._node2.getCx()
-            this._rectP3.y = this._node2.getCy()
-            this._initP2P4()
+            this._updateP2P4()
         }
     }
     static getLineLength(x1,y1,x2,y2){
@@ -245,6 +255,20 @@ class EdgeProg extends EdgeStack{
         //this will neatly display the point x and y in as a comma seperated integer
         return `${point.x},${point.y}`
     }
+    _updateRectPoints(){
+        //this will update the rect with the current points regardless if they are new or not
+        this._rectP1.x = this.getX1()
+        this._rectP1.y = this.getY1()
+        this._rectP3.x = this.getX2()
+        this._rectP3.y = this.getY2()
+        this._updateP2P4()
+        this._rect.setAttribute("points",`${this._displayPoint(this._rectP1)} ${this._displayPoint(this._rectP2)} ${this._displayPoint(this._rectP3)} ${this._displayPoint(this._rectP4)}`)
+    }
+    _initRect(){
+        this._updateRectPoints()
+        this._clipPath.setAttribute("id",`edge${this._id}`)
+        EdgeProg._appendTo(clipPath,this._rect)
+    }
     //==============================test method==============================
     _test(){
         let poly = document.createElementNS("http://www.w3.org/2000/svg","polygon")
@@ -268,8 +292,6 @@ class EdgeGraph extends EdgeProg{
         this.updateNode2Endpoint(newNode.getCx(),newNode.getCy())
         this._edge.classList.replace("edge-unclickable","edge-clickable")
         this._setEndOrientation()
-        this._initRectCoord()
-        this._test()
     }
     setFirstNode(newNode){
         this._node1 = newNode
@@ -286,13 +308,15 @@ class EdgeGraph extends EdgeProg{
         this._edge.setAttribute("y2",newY)
         this._progEdge.setAttribute("x2",newX)
         this._progEdge.setAttribute("y2",newY)
-        
+        this._updateRectPoints()
     }
     updatePos(node,newX,newY){
         //node is the node that is being moved
         if (node === this._node1){
+            this._updateRectPoints()
             this.updateNode1Endpoint(newX,newY)
         }else if (node === this._node2){
+            this._updateRectPoints()
             this.updateNode2Endpoint(newX,newY)
             
         }
