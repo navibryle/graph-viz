@@ -41,11 +41,14 @@ class Canvas{
         this._svgDefs.removeChild(edge.getDefs())
     }
     progNode(node){
+        //this will only be called once and the whole component tree will be proged
+        /*
         if (node.getNumEdges() === 0){
             node.progEast()
         }else{
-            //finish later *************************************************************************************************88
-        }
+            
+        }*/
+        node.progEast()
     }
     clickedNode(node){
         if (this._selected === null){

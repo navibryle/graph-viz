@@ -152,10 +152,50 @@ class SecondNode extends Node{
         return mainGrp
     }
 }
-class NodeProg extends SecondNode{
-    //will be progging node in cardinal directions
-    constructor (x,y,id,canvas,radius,color){
+class NodeEdge extends SecondNode{
+    constructor(x,y,id,canvas,radius,color,addEdgeBtn){
         super(x,y,id,canvas,radius,color)
+        this._addEdgeBtn = document.getElementById(addEdgeBtn)
+        this._edge = []
+        this._edgeNum = 0
+    }
+    _canAddEdge(edge){
+        let lenEdges = this._edge.length 
+        let firstNode = edge.getFirstNode().getNode()
+        for (let i = 0; i<lenEdges;i++){
+            //second node of the edge parameters is this
+            if (this._edge[i].getFirstNode().getNode() === firstNode || this._edge[i].getSecondNode().getNode() === firstNode){
+                return false
+            }
+        }
+        return true
+    }
+    activateAddEdgeBtn(){
+        this._addEdgeBtn.style["opacity"] = "1"
+    }
+    deavtivateAddEdgeBtn(){
+        this._addEdgeBtn.style["opacity"] = "0"
+    }
+    addEdge(edge){
+        this._edge.push(edge)
+        this._edgeNum += 1
+    }
+    removeEdge(edge){
+        for (let i = 0; i <this._edgeNum; i++){
+            if (this._edge[i].getEdge() === edge.getEdge()){ //getEdge()  will give the svg line representing an edge
+                this._edge.splice(i,1)
+                this._edgeNum -= 1
+            }
+        }
+    }
+    getNumEdges(){
+        return this._edgeNum
+    }
+}
+class NodeProg extends NodeEdge{
+    //will be progging node in cardinal directions
+    constructor (x,y,id,canvas,radius,color,addEdgeBtn){
+        super(x,y,id,canvas,radius,color,addEdgeBtn)
         this._progCard = null // this will be the cardinal postion that the node will prog towards
     }
     progEast(){
@@ -239,6 +279,14 @@ class NodeProg extends SecondNode{
         }
         intervalId = setInterval(intervalCb,50)
     }
+    _startEdgeProg(){
+        let len = this._edge.length
+        for (let i = 0;i<len;i++){
+            console.log("an edge should be progging")
+            this._edge[i] .progEdgeFromNode(this)
+        }
+    }
+    //============= might not need this at all======================================
     isHalfWay(){
         //this will return a boolean which will be true if the node's clipping rectangle is halfway through the node
         //rectangle will always have their coord to be the intercardinal northwest
@@ -252,49 +300,9 @@ class NodeProg extends SecondNode{
 
         }
     }
+    //===========================================================================
 }
-class NodeEdge extends NodeProg{
-    constructor(x,y,id,canvas,radius,color,addEdgeBtn){
-        super(x,y,id,canvas,radius,color)
-        this._addEdgeBtn = document.getElementById(addEdgeBtn)
-        this._edge = []
-        this._edgeNum = 0
-    }
-    _canAddEdge(edge){
-        let lenEdges = this._edge.length 
-        let firstNode = edge.getFirstNode().getNode()
-        for (let i = 0; i<lenEdges;i++){
-            //second node of the edge parameters is this
-            if (this._edge[i].getFirstNode().getNode() === firstNode || this._edge[i].getSecondNode().getNode() === firstNode){
-                return false
-            }
-        }
-        return true
-    }
-    activateAddEdgeBtn(){
-        this._addEdgeBtn.style["opacity"] = "1"
-    }
-    deavtivateAddEdgeBtn(){
-        this._addEdgeBtn.style["opacity"] = "0"
-    }
-    addEdge(edge){
-        this._edge.push(edge)
-        this._edgeNum += 1
-    }
-    removeEdge(edge){
-        for (let i = 0; i <this._edgeNum; i++){
-            if (this._edge[i].getEdge() === edge.getEdge()){ //getEdge()  will give the svg line representing an edge
-                this._edge.splice(i,1)
-                this._edgeNum -= 1
-            }
-        }
-    }
-    getNumEdges(){
-        return this._edgeNum
-    }
-}
-
-class GraphNode extends NodeEdge{
+class GraphNode extends NodeProg{
     constructor(x,y,id,canvas,radius,color,addEdgeBtn){
         super(x,y,id,canvas,radius,color,addEdgeBtn)
         this._active = false //true if the node has been clicked and the option to add an edge is available

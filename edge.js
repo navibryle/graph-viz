@@ -146,7 +146,6 @@ class EdgeProg extends EdgeStack{
         let y2 = parseInt(this._rectP3.y,10)
         let xDelta = x1 - x2
         let yDelta = y1 - y2
-        console.log(x1,y1,x2,y2)
         this._updateP2(x1,y2,xDelta,yDelta)
         this._updateP4(x2,y1,xDelta,yDelta)
     }
@@ -169,11 +168,6 @@ class EdgeProg extends EdgeStack{
             }
         }else{
             this._rectP2.y = y2
-        }
-    }
-    test(inp,where){
-        if (inp > 1000){
-            console.log(where)
         }
     }
     _updateP4(x2,y1,xDelta,yDelta){
@@ -243,6 +237,7 @@ class EdgeProg extends EdgeStack{
         intervalId = setInterval(intervalCb,50)
     }
     progEdgeFromNode(node){
+        
         if (node === this._leftMost){
             this._progEdgeLeftToRight()
         }else if (node === this._rightMost){
@@ -268,14 +263,6 @@ class EdgeProg extends EdgeStack{
         this._updateRectPoints()
         this._clipPath.setAttribute("id",`edge${this._id}`)
         EdgeProg._appendTo(clipPath,this._rect)
-    }
-    //==============================test method==============================
-    _test(){
-        let poly = document.createElementNS("http://www.w3.org/2000/svg","polygon")
-        let parent = document.getElementById("canvas")
-        poly.setAttribute("fill","green")
-        poly.setAttribute("points",`${this._displayPoint(this._rectP1)} ${this._displayPoint(this._rectP2)} ${this._displayPoint(this._rectP3)} ${this._displayPoint(this._rectP4)}`)
-        parent.appendChild(poly)
     }
 }
 class EdgeGraph extends EdgeProg{ 

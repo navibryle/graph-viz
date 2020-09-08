@@ -23,6 +23,13 @@ function deleteNodeEventListener(pointer,toolbar){
         }
     })
 }
+function playNodeEventListener(pointer,toolbar,canvas){
+    let playBtn = document.getElementById("playNode")
+    playBtn.addEventListener("click",function(){
+        toolbar.setActive("playNode")
+        canvas.getSelectedNode().progEast()
+    })
+}
 function canvasNodeEventListener(pointer,id,canvas,toolbar){
     /*
     cases:
@@ -85,6 +92,6 @@ function main(){
     deleteNodeEventListener(pointer,toolbar)
     addEdgeEventListener(pointer,canvas,toolbar)
     canvasNodeEventListener(pointer,id,canvas,toolbar)
-    
+    playNodeEventListener(pointer,toolbar,canvas)
 }
 main()
