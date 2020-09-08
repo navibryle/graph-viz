@@ -139,7 +139,7 @@ class EdgeProg extends EdgeStack{
     _pointsAreNull(){
         return EdgeProg._pointIsNull(this._rectP2) && EdgeProg._pointIsNull(this._rectP3) && EdgeProg._pointIsNull(this._rectP4)
     }
-    _updateP2P4(){
+    _updatePoints(){
         let x1 = parseInt(this._rectP1.x,10)
         let y1 = parseInt(this._rectP1.y,10)
         let x2 = parseInt(this._rectP3.x,10)
@@ -200,7 +200,7 @@ class EdgeProg extends EdgeStack{
     _initRectCoord(){
         //this should only ever be called once when the second node is set
         if (this._pointsAreNull()){
-            this._updateP2P4()
+            this._updatePoints()
         }
     }
     static getLineLength(x1,y1,x2,y2){
@@ -261,7 +261,7 @@ class EdgeProg extends EdgeStack{
         this._rectP1.y = this.getY1()
         this._rectP3.x = this.getX2()
         this._rectP3.y = this.getY2()
-        this._updateP2P4()
+        this._updatePoints()
         this._rect.setAttribute("points",`${this._displayPoint(this._rectP1)} ${this._displayPoint(this._rectP2)} ${this._displayPoint(this._rectP3)} ${this._displayPoint(this._rectP4)}`)
     }
     _initRect(){

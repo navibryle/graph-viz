@@ -40,6 +40,13 @@ class Canvas{
         this._canvas.removeChild(edge.getMainGrp())
         this._svgDefs.removeChild(edge.getDefs())
     }
+    progNode(node){
+        if (node.getNumEdges() === 0){
+            node.progEast()
+        }else{
+            //finish later *************************************************************************************************88
+        }
+    }
     clickedNode(node){
         if (this._selected === null){
             this._selected = node

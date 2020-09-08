@@ -156,16 +156,22 @@ class NodeProg extends SecondNode{
     //will be progging node in cardinal directions
     constructor (x,y,id,canvas,radius,color){
         super(x,y,id,canvas,radius,color)
+        this._progCard = null // this will be the cardinal postion that the node will prog towards
     }
     progEast(){
         //this will make the node seem like its being progresed
+        this._progCard = "East"
         this._subGrp.setAttribute("clip-path",`url(#node${this._id})`)
         let intervalId
         let instance = this
         const intervalCb = () =>{
             let x = instance.getRectXCoord()
-            if ( x <= (parseInt(instance._cx,10) + parseInt(instance._radius,10))){
+            let xCoord = parseInt(instance._cx,10)
+            if ( x <= (xCoord + parseInt(instance._radius,10))){
                 instance._rect.setAttribute("x",x+1)
+                if (x === xCoord){
+                    instance._startEdgeProg()
+                }
             }else{
                 
                 clearInterval(intervalId)
@@ -174,13 +180,18 @@ class NodeProg extends SecondNode{
         intervalId = setInterval(intervalCb,50)
     }
     progWest(){
+        this._progCard = "West"
         this._subGrp.setAttribute("clip-path",`url(#node${this._id})`)
         let intervalId
         let instance = this
         const intervalCb = () =>{
             let x = instance.getRectXCoord()
-            if ( x >= (parseInt(instance._cx,10) - (3*parseInt(instance._radius,10)))){
+            let xCoord = parseInt(instance._cx,10)
+            if ( x >= (xCoord - (3*parseInt(instance._radius,10)))){
                 instance._rect.setAttribute("x",x-1)
+                if (x === xCoord){
+                    instance._startEdgeProg()
+                }
             }else{
                 
                 clearInterval(intervalId)
@@ -189,13 +200,18 @@ class NodeProg extends SecondNode{
         intervalId = setInterval(intervalCb,50)
     }
     progNorth(){
+        this._progCard = "North"
         this._subGrp.setAttribute("clip-path",`url(#node${this._id})`)
         let intervalId
         let instance = this
         const intervalCb = () =>{
             let y = instance.getRectYCoord()
-            if ( y >= (parseInt(instance._cy,10) - (3*parseInt(instance._radius,10)))){
+            let yCoord = parseInt(instance._cy,10)
+            if ( y >= ( yCoord - (3*parseInt(instance._radius,10)))){
                 instance._rect.setAttribute("y",y-1)
+                if (y === yCoord){
+                    instance._startEdgeProg()
+                }
             }else{
                 
                 clearInterval(intervalId)
@@ -204,19 +220,37 @@ class NodeProg extends SecondNode{
         intervalId = setInterval(intervalCb,50)
     }
     progSouth(){
+        this._progCard = "South"
         this._subGrp.setAttribute("clip-path",`url(#node${this._id})`)
         let intervalId
         let instance = this
         const intervalCb = () =>{
             let y = instance.getRectYCoord()
-            if ( y <= (parseInt(instance._cy,10) + (parseInt(instance._radius,10)))){
+            let yCoord = parseInt(instance._cy,10)
+            if ( y <= (yCoord + (parseInt(instance._radius,10)))){
                 instance._rect.setAttribute("y",y+1)
+                if (y === yCoord){
+                    instance._startEdgeProg()
+                }
             }else{
                 
                 clearInterval(intervalId)
             }
         }
         intervalId = setInterval(intervalCb,50)
+    }
+    isHalfWay(){
+        //this will return a boolean which will be true if the node's clipping rectangle is halfway through the node
+        //rectangle will always have their coord to be the intercardinal northwest
+        //width and height of rect is radius * 2
+        let p1 = {x:this._rect.getRectXCoord(),y:this._rect.getRectYCoord()}
+        let p2 = {x:p1.x,y:p1.y+(2*this._radius)}
+        let p3 = {x:p1.x+(2*this._radius),y:p1.y}
+        let p4 = {x:p3.x,y:p2.y}
+        switch (this._progCard){
+            case "North":
+
+        }
     }
 }
 class NodeEdge extends NodeProg{
@@ -254,6 +288,9 @@ class NodeEdge extends NodeProg{
                 this._edgeNum -= 1
             }
         }
+    }
+    getNumEdges(){
+        return this._edgeNum
     }
 }
 
