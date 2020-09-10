@@ -27,7 +27,7 @@ function playNodeEventListener(pointer,toolbar,canvas){
     let playBtn = document.getElementById("playNode")
     playBtn.addEventListener("click",function(){
         toolbar.setActive("playNode")
-        canvas.getSelectedNode().progEast()
+        canvas.progSelected()
     })
 }
 function canvasNodeEventListener(pointer,id,canvas,toolbar){

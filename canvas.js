@@ -40,13 +40,25 @@ class Canvas{
         this._canvas.removeChild(edge.getMainGrp())
         this._svgDefs.removeChild(edge.getDefs())
     }
-    progNode(node){
-        if (node.getNumEdges() === 0){
-            node.progEast()
+    progSelected(){
+        if (this._selected.getNumEdges() === 0){
+            this._selected.progEast()
         }else{
-         if (node._edge[0].getOppositeNode(node)){
-             //will get the postion of the node from the firt edge in the list and then prog that way
-         }   
+            let node2 = this._selected._edge[0].getOppositeNode(this._selected)
+            let node1X = this._selected.getCx()
+            let node1Y = this._selected.getCy()
+            let node2X = node2.getCx()
+            let node2Y = node2.getCy()
+            // the series of conditionals that follow will check for the correct cardinal position to prog
+            if ((node1X - node2X) > 200){
+                this._selected.progWest()
+            }else if ((node1X - node2X) < -200){
+                this._selected.progEast()
+            }else if (node1Y > node2Y){
+                this._selected.progNorth()
+            }else{
+                this._selected.progSouth()
+            }
         }
     }
     clickedNode(node){

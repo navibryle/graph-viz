@@ -220,6 +220,7 @@ class NodeProg extends NodeEdge{
         intervalId = setInterval(intervalCb,50)
     }
     progWest(){
+        
         this._progCard = "West"
         this._subGrp.setAttribute("clip-path",`url(#node${this._id})`)
         let intervalId
@@ -229,7 +230,8 @@ class NodeProg extends NodeEdge{
             let xCoord = parseInt(instance._cx,10)
             if ( x >= (xCoord - (3*parseInt(instance._radius,10)))){
                 instance._rect.setAttribute("x",x-1)
-                if (x === xCoord){
+                if (x+2*parseInt(instance._radius,10) === xCoord){
+                    
                     instance._startEdgeProg()
                 }
             }else{
@@ -247,9 +249,10 @@ class NodeProg extends NodeEdge{
         const intervalCb = () =>{
             let y = instance.getRectYCoord()
             let yCoord = parseInt(instance._cy,10)
+            
             if ( y >= ( yCoord - (3*parseInt(instance._radius,10)))){
                 instance._rect.setAttribute("y",y-1)
-                if (y === yCoord){
+                if (y+2*parseInt(instance._radius,10) === yCoord){
                     instance._startEdgeProg()
                 }
             }else{
