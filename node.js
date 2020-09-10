@@ -282,7 +282,6 @@ class NodeProg extends NodeEdge{
     _startEdgeProg(){
         let len = this._edge.length
         for (let i = 0;i<len;i++){
-            console.log("an edge should be progging")
             this._edge[i] .progEdgeFromNode(this)
         }
     }

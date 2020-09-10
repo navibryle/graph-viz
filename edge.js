@@ -54,6 +54,14 @@ class Edge{
             console.error("orientation cant be set since node 2 is still not set")
         }
     }
+    getOppositeNode(node){
+        //this will get the node that is opposite to this one
+        if (node === this._node1){
+            return this._node2
+        }else{
+            return this._node1
+        }
+    }
 }
 class EdgeStack extends Edge{
     //this just needs to move with the black edge
@@ -134,21 +142,15 @@ class EdgeProg extends EdgeStack{
     }
     static _pointIsNull(point){
         //point object needs to have an x and y component
-        return point.x === null && point.y === null
+        if (point === undefined || point === null || (point.x === null && point.y === null)){
+            return true
+        }
+        return  false
     }
     _pointsAreNull(){
         return EdgeProg._pointIsNull(this._rectP2) && EdgeProg._pointIsNull(this._rectP3) && EdgeProg._pointIsNull(this._rectP4)
     }
-    _updatePoints(){
-        let x1 = parseInt(this._rectP1.x,10)
-        let y1 = parseInt(this._rectP1.y,10)
-        let x2 = parseInt(this._rectP3.x,10)
-        let y2 = parseInt(this._rectP3.y,10)
-        let xDelta = x1 - x2
-        let yDelta = y1 - y2
-        this._updateP2(x1,y2,xDelta,yDelta)
-        this._updateP4(x2,y1,xDelta,yDelta)
-    }
+    
     _updateP2(x1,y2,xDelta,yDelta){
         //this function will update both the x and y coordinate of this._rect
         if (Math.abs(xDelta) <= 50){
@@ -203,8 +205,10 @@ class EdgeProg extends EdgeStack{
         let length = Math.sqrt(xComp + yComp)
         return length
     }
+    /*
     _progEdgeLeftToRight(){
         //this will prog the edge starting from node1 to node 2
+        //instand of pushing 
         this._subGrp.setAttribute("clip-path",`url(#edge${this._id})`)
         let intervalId
         let instance = this
@@ -235,32 +239,100 @@ class EdgeProg extends EdgeStack{
             }
         }
         intervalId = setInterval(intervalCb,50)
+    }*/
+    fromP1(){
+        let intervalId
+        this._subGrp.setAttribute("clip-path",`url(#edge${this._id})`)
+        const intervalCb = () =>{
+            if (!this.coordsEq(this._rectP1,this._rectP4)){
+                this.coordToCoord(this._rectP1,this._rectP4)
+            }
+            if (!this.coordsEq(this._rectP2,this._rectP3)){
+                this.coordToCoord(this._rectP2,this._rectP3)
+            }else if(this.coordsEq(this._rectP1,this._rectP4) && this.coordsEq(this._rectP2,this._rectP3)){
+                clearInterval(intervalId)
+            }
+            
+            this._updateRectPointsDom()
+        }
+        intervalId = setInterval(intervalCb,50)
+    }
+    fromP3(){
+        let intervalId
+        this._subGrp.setAttribute("clip-path",`url(#edge${this._id})`)
+        const intervalCb = () =>{
+            console
+            if (!this.coordsEq(this._rectP1,this._rectP4)){
+                this.coordToCoord(this._rectP4,this._rectP1)
+            }
+            if (!this.coordsEq(this._rectP2,this._rectP3)){
+                this.coordToCoord(this._rectP3,this._rectP2)
+            }else if(this.coordsEq(this._rectP1,this._rectP4) && this.coordsEq(this._rectP2,this._rectP3)){
+                clearInterval(intervalId)
+            }
+            console.log(this._rectP3.x,this._rectP4.x)
+            this._updateRectPointsDom()
+        }
+        intervalId = setInterval(intervalCb,50)
+    }
+    coordToCoord(coord1,coord2){
+        //this function will move coord 1 closer to coord 2 by 1 pixel at a time
+        if (coord1.x < coord2.x){
+            coord1.x += 1
+        }else if (coord1.x > coord2.x){
+            coord1.x -= 1
+        }
+        if (coord1.y < coord2.y){
+            coord1.y += 1
+        }else if (coord1.y > coord2.y){
+            coord1.y -= 1
+        }
+    }
+    coordsEq(coord1,coord2){
+        //this will check if the coordinates are equal
+        return Math.floor(coord1.x) === Math.floor(coord2.x) && Math.floor(coord1.y) === Math.floor(coord2.y)
     }
     progEdgeFromNode(node){
-        
-        if (node === this._leftMost){
-            this._progEdgeLeftToRight()
-        }else if (node === this._rightMost){
-            this._progEdgeRightToLeft()
+        if (this.coordsEq({x:node.getCx(),y:node.getCy()},this._rectP1)){
+            this.fromP1()
         }else{
-            console.error("edge is not connected to node")
+            this.fromP3()
         }
     }
     _displayPoint(point){
         //this will neatly display the point x and y in as a comma seperated integer
         return `${point.x},${point.y}`
     }
-    _updateRectPoints(){
-        //this will update the rect with the current points regardless if they are new or not
+    _updatePoints(){
+        //this will update all 4 points in the object and NOT in the dom
+        this._rectP1.x = parseInt(this.getX1(),10)
+        this._rectP1.y = parseInt(this.getY1(),10)
+        this._rectP3.x = parseInt(this.getX2(),10)
+        this._rectP3.y = parseInt(this.getY2(),10)
+        let x1 = this._rectP1.x
+        let y1 = this._rectP1.y
+        let x2 = this._rectP3.x
+        let y2 = this._rectP3.y
+        let xDelta = x1 - x2
+        let yDelta = y1 - y2
+        this._updateP2(x1,y2,xDelta,yDelta)
+        this._updateP4(x2,y1,xDelta,yDelta)
+    }
+    /*
+    _updateP1P2(){
+        //this will update the attributes _rectP1 and _rectP2
         this._rectP1.x = this.getX1()
         this._rectP1.y = this.getY1()
         this._rectP3.x = this.getX2()
         this._rectP3.y = this.getY2()
-        this._updatePoints()
-        this._rect.setAttribute("points",`${this._displayPoint(this._rectP1)} ${this._displayPoint(this._rectP2)} ${this._displayPoint(this._rectP3)} ${this._displayPoint(this._rectP4)}`)
+    }*/
+    _updateRectPointsDom(){
+        //this will update the dom
+        this._rect.setAttribute("points",`${this._displayPoint(this._rectP1)} ${this._displayPoint(this._rectP2)} ${this._displayPoint(this._rectP3)} ${this._displayPoint(this._rectP4)}`)            
     }
     _initRect(){
-        this._updateRectPoints()
+        this._updatePoints()
+        this._updateRectPointsDom()
         this._clipPath.setAttribute("id",`edge${this._id}`)
         EdgeProg._appendTo(clipPath,this._rect)
     }
@@ -295,15 +367,18 @@ class EdgeGraph extends EdgeProg{
         this._edge.setAttribute("y2",newY)
         this._progEdge.setAttribute("x2",newX)
         this._progEdge.setAttribute("y2",newY)
-        this._updateRectPoints()
+        this._updatePoints()
+        this._updateRectPointsDom()
     }
     updatePos(node,newX,newY){
         //node is the node that is being moved
         if (node === this._node1){
-            this._updateRectPoints()
+            this._updatePoints()
+            this._updateRectPointsDom()
             this.updateNode1Endpoint(newX,newY)
         }else if (node === this._node2){
-            this._updateRectPoints()
+            this._updatePoints()
+            this._updateRectPointsDom()
             this.updateNode2Endpoint(newX,newY)
             
         }
