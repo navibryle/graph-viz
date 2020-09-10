@@ -205,41 +205,6 @@ class EdgeProg extends EdgeStack{
         let length = Math.sqrt(xComp + yComp)
         return length
     }
-    /*
-    _progEdgeLeftToRight(){
-        //this will prog the edge starting from node1 to node 2
-        //instand of pushing 
-        this._subGrp.setAttribute("clip-path",`url(#edge${this._id})`)
-        let intervalId
-        let instance = this
-        let x2 = parseInt(instance._rightMost.getCx(),10)
-        const intervalCb = () =>{
-            let x1 = parseInt(instance._rect.getAttribute("x"),10)
-            if (x1 < x2){
-                instance._rect.setAttribute("x",`${x1+1}`)
-            }else{
-                clearInterval(intervalId)
-            }
-        }
-        intervalId = setInterval(intervalCb,50)
-    }
-    _progEdgeRightToLeft(){
-        //this will prog the edge starting from node1 to node
-        //this will prog the edge starting from node1 to node 2
-        this._subGrp.setAttribute("clip-path",`url(#edge${this._id})`)
-        let intervalId
-        let instance = this
-        let cap = parseInt(instance._rect.getAttribute("x"),10) - parseInt(instance._rect.getAttribute("width"),10)
-        const intervalCb = () =>{
-            let x = parseInt(instance._rect.getAttribute("x"),10)
-            if (x >= cap){
-                instance._rect.setAttribute("x",`${x-1}`)
-            }else{
-                clearInterval(intervalId)
-            }
-        }
-        intervalId = setInterval(intervalCb,50)
-    }*/
     fromP1(){
         let intervalId
         this._subGrp.setAttribute("clip-path",`url(#edge${this._id})`)
@@ -275,6 +240,15 @@ class EdgeProg extends EdgeStack{
         }
         intervalId = setInterval(intervalCb,50)
     }
+    //=====================================================================================================================================
+    progFrom(point1,point2){
+        //this function will decide which point should approach another point
+        /* this function is made since p2 and p4 get place in the wrong spots,but the shape of the clipping rectangle is still a rectangle.
+        so to remedy this we instead get the longest sides of the rectangle and we prog those sides regardless of where p2 and p4 are located 
+        this way the clippingrectangle is used properly
+        */
+    }
+    //=======================================================================================================================================
     coordToCoord(coord1,coord2){
         //this function will move coord 1 closer to coord 2 by 1 pixel at a time
         if (coord1.x < coord2.x){
