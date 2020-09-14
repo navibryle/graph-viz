@@ -124,9 +124,9 @@ class EdgeProg extends EdgeStack{
         super(canvas,pointer,id)
         this._rect = document.createElementNS("http://www.w3.org/2000/svg","polygon")
         this._clipPath = document.createElementNS("http://www.w3.org/2000/svg","clipPath")
-        this._rectP1 = {x:this.getX1(),y:this.getY1()}
+        this._rectP1 = {x:parseInt(this.getX1(),10),y:parseInt(this.getY1(),10)}
         this._rectP2 = {x:null,y:null}
-        this._rectP3 = {x:this.getX2(),y:this.getY2()}
+        this._rectP3 = {x:parseInt(this.getX2(),10),y:parseInt(this.getY2(),10)}
         this._rectP4 = {x:null,y:null}
         this._initDefs()
     }
@@ -241,12 +241,69 @@ class EdgeProg extends EdgeStack{
         intervalId = setInterval(intervalCb,50)
     }
     //=====================================================================================================================================
-    progFrom(point1,point2){
-        //this function will decide which point should approach another point
-        /* this function is made since p2 and p4 get place in the wrong spots,but the shape of the clipping rectangle is still a rectangle.
-        so to remedy this we instead get the longest sides of the rectangle and we prog those sides regardless of where p2 and p4 are located 
-        this way the clippingrectangle is used properly
-        */
+    progFrom(point){
+        //point needs to be either p1 or p2
+        /*
+        first need to find the longest side then find the point adjacent to the point that we are progging from. Then we pick the first point and 
+        see which one lines up wiht one of the remainign two points. need to only test one since if the one we tested doesnt work then its the other one*/
+        //longest side can be found by using the delta in p1 and p3
+        let adjacentPoint = null
+        let corresP = null// the corresponding point to p1 that has simlar y coord
+        let corresAdj = null// the corresponding pint to the adjacent point that has similar y coordinate
+        // need to account for the deviance
+        if (Math.abs(this._rectP1.x - this._rectP3) > Math.abs(this._rectP1.y - this._rectP3.y)){
+            //this is when the longest side is in the x-axis therefore the adjacent point will be in the same x-axis
+            adjacentPoint = this.similarX(point,this._rectP2) ? this._rectP2 : this._rectP4
+            //gonna need to move the adjacentPoint and point to the remaining poinhts now the quesiton is which point
+            //corresP1 will be the corresponding point  to p1 with the simlar y coordinate
+            if (this.similarY(point,this._rectP3)){
+                corresP = this._rectP3
+                corresAdj = this._rectP4 === adjacentPoint ? this._rectP3 : this._rectP4
+            }else{
+                corresP = this._rectP4 === adjacentPoint ? this._rectP3 : this._rectP4
+                corresAdj = this._rectP3
+            }
+        }else{
+            //the longest side is in the x axis
+            adjacentPoint = this.similarY(point,this._rectP2) ? this._rectP2 : this._rectP4
+            //gonna need to move the adjacentPoint and point to the remaining poinhts now the quesiton is which point
+            //corresP1 will be the corresponding point  to p1 with the simlar y coordinate
+            if (this.similarX(point,this._rectP3)){
+                corresP = this._rectP3
+                corresAdj = this._rectP4 === adjacentPoint ? this._rectP3 : this._rectP4
+            }else{
+                corresP = this._rectP4 === adjacentPoint ? this._rectP3 : this._rectP4
+                corresAdj = this._rectP3
+            }
+        }
+        this.coordToCoord(point,corresP)
+        this.coordToCoord(adjacentPoint,corresAdj)
+    }
+    similarX(point1,point2){
+        //point 1 must be p1 or p3 and point 2 must be p2 or p4
+        if (Math.abs(this._rectP1.x -this._rectP3.x) <= 20){
+            if ((point1.x === (point2.x-50)) || (point1.x === (point2.x+50))){
+             return true   
+            }
+        }else{
+            if (point1.x === point2.x){
+                return true
+            }
+        }
+        return false 
+    }
+    similarY(point1,point2){
+        //point 1 must be p1 or p3 and point 2 must be p2 or p4
+        if (Math.abs(this._rectP1.y -this._rectP3.y) <= 20){
+            if ((point1.y === (point2.y-50)) || (point1.y === (point2.y+50))){
+             return true   
+            }
+        }else{
+            if (point1.y === point2.y){
+                return true
+            }
+        }
+        return false 
     }
     //=======================================================================================================================================
     coordToCoord(coord1,coord2){
@@ -267,11 +324,7 @@ class EdgeProg extends EdgeStack{
         return Math.floor(coord1.x) === Math.floor(coord2.x) && Math.floor(coord1.y) === Math.floor(coord2.y)
     }
     progEdgeFromNode(node){
-        if (this.coordsEq({x:node.getCx(),y:node.getCy()},this._rectP1)){
-            this.fromP1()
-        }else{
-            this.fromP3()
-        }
+        this.progFrom({x:parseInt(node.getCx(),10),y:parseInt(node.getCy(),10)})
     }
     _displayPoint(point){
         //this will neatly display the point x and y in as a comma seperated integer
