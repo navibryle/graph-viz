@@ -205,6 +205,7 @@ class EdgeProg extends EdgeStack{
         let length = Math.sqrt(xComp + yComp)
         return length
     }
+    /*
     fromP1(){
         let intervalId
         this._subGrp.setAttribute("clip-path",`url(#edge${this._id})`)
@@ -226,7 +227,6 @@ class EdgeProg extends EdgeStack{
         let intervalId
         this._subGrp.setAttribute("clip-path",`url(#edge${this._id})`)
         const intervalCb = () =>{
-            console
             if (!this.coordsEq(this._rectP1,this._rectP4)){
                 this.coordToCoord(this._rectP4,this._rectP1)
             }
@@ -239,7 +239,7 @@ class EdgeProg extends EdgeStack{
             this._updateRectPointsDom()
         }
         intervalId = setInterval(intervalCb,50)
-    }
+    }*/
     //=====================================================================================================================================
     progFrom(point){
         //point needs to be either p1 or p2
@@ -251,7 +251,8 @@ class EdgeProg extends EdgeStack{
         let corresP = null// the corresponding point to p1 that has simlar y coord
         let corresAdj = null// the corresponding pint to the adjacent point that has similar y coordinate
         // need to account for the deviance
-        if (Math.abs(this._rectP1.x - this._rectP3) > Math.abs(this._rectP1.y - this._rectP3.y)){
+        if (Math.abs(this._rectP1.x - this._rectP3.x) > Math.abs(this._rectP1.y - this._rectP3.y)){
+            console.log("horizontal")
             //this is when the longest side is in the x-axis therefore the adjacent point will be in the same x-axis
             adjacentPoint = this.similarX(point,this._rectP2) ? this._rectP2 : this._rectP4
             //gonna need to move the adjacentPoint and point to the remaining poinhts now the quesiton is which point
@@ -264,6 +265,7 @@ class EdgeProg extends EdgeStack{
                 corresAdj = this._rectP3
             }
         }else{
+            console.log("vertical")
             //the longest side is in the x axis
             adjacentPoint = this.similarY(point,this._rectP2) ? this._rectP2 : this._rectP4
             //gonna need to move the adjacentPoint and point to the remaining poinhts now the quesiton is which point
@@ -276,8 +278,20 @@ class EdgeProg extends EdgeStack{
                 corresAdj = this._rectP3
             }
         }
-        this.coordToCoord(point,corresP)
-        this.coordToCoord(adjacentPoint,corresAdj)
+        this.prog(point,adjacentPoint,corresP,corresAdj)
+    }
+    prog(point,adjacentPoint,corresP,corresAdj){
+        
+        let intervalId
+        this._subGrp.setAttribute("clip-path",`url(#edge${this._id})`)
+        const intervalCb = () =>{
+            console.log("here")
+            this.coordToCoord(point,corresP)
+            this.coordToCoord(adjacentPoint,corresAdj)
+            this._rectP1 = point
+            this._updateRectPointsDom()
+        }
+        intervalId = setInterval(intervalCb,50)
     }
     similarX(point1,point2){
         //point 1 must be p1 or p3 and point 2 must be p2 or p4
