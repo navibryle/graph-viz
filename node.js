@@ -23,6 +23,9 @@ class Node{
     getCy(){
         return this._cy
     }
+    getPoints(){
+        return {x:this._cx,y:this._cy}
+    }
     getFill(){
         return this._fill
     }
