@@ -277,7 +277,7 @@ class EdgeProg extends EdgeStack{
         let boolY = false
         console.log("similar",point1,rectPoint)
         if (Math.abs(this._node1.getCx() - this._node2.getCx()) <= 20){
-            if (point1.x+70 === rectPoint.x || point1.x-70 === rectPoint.x){
+            if (point1.x+70 === rectPoint.x || point1.x-70 === rectPoint.x || point1.x-70 === rectPoint.x+70 || point1.x+70 === rectPoint.x-70){
                 boolX = true
             }
         }else{
@@ -286,7 +286,7 @@ class EdgeProg extends EdgeStack{
             }
         }
         if (Math.abs(this._node1.getCy() - this._node2.getCy()) <= 20){
-            if (point1.y+70 === rectPoint.y || point1.y-70 === rectPoint.y){
+            if (point1.y+70 === rectPoint.y || point1.y-70 === rectPoint.y || point1.y-70 === rectPoint.y+70 || point1.y+70 === rectPoint.y-70){
                 boolY = true
             }
         }else{
@@ -297,6 +297,7 @@ class EdgeProg extends EdgeStack{
         return boolX && boolY
     }
     progFrom(point){
+        //need to change this since the adjacent point can also be P3 now
         let adjacentPoint = null
         let corresP = null// the corresponding point to p1 that has simlar y coord
         let corresAdj = null// the corresponding pint to the adjacent point that has similar y coordinate
@@ -306,39 +307,24 @@ class EdgeProg extends EdgeStack{
         let output = this._assignPoints(nodeFrom,nodeTo,point)
         nodeFrom = output[0]
         nodeTo = output[1]
-        console.log(nodeFrom,nodeTo)
         // need to account for the deviance
         if (Math.abs(this._rectP1.x - this._rectP3.x) > Math.abs(this._rectP1.y - this._rectP3.y)){
             dir = 'x'
             console.log(`P1: ${this._rectP1.x},${this._rectP1.y} P2: ${this._rectP2.x},${this._rectP2.y} P3: ${this._rectP3.x},${this._rectP3.y} P4: ${this._rectP4.x},${this._rectP4.y}`)
-            //this is when the longest side is in the x-axis therefore the adjacent point will be in the same x-axis
-            adjacentPoint = this.similarX(nodeFrom,this._rectP2) ? this._rectP2 : this._rectP4
-            //gonna need to move the adjacentPoint and point to the remaining poinhts now the quesiton is which point
-            //corresP1 will be the corresponding point  to p1 with the simlar y coordinate
-            if (this.similarY(nodeFrom,nodeTo)){
-                corresP = nodeTo
-                corresAdj = this._rectP4.y === adjacentPoint.y ? this._rectP2 : this._rectP4
-            }else{
-                corresP = this._rectP4.y === adjacentPoint.y ? this._rectP2 : this._rectP4
-                corresAdj = nodeTo
-            }
-            console.log(`P1: ${this._rectP1.x},${this._rectP1.y} P2: ${this._rectP2.x},${this._rectP2.y} P3: ${this._rectP3.x},${this._rectP3.y} P4: ${this._rectP4.x},${this._rectP4.y}`)
+            adjacentPoint = this.similarX(nodeFrom,[this._rectP1,this._rectP2,this._rectP3,this._rectP4])
+            corresP = this.similarY(nodeFrom,[this._rectP1,this._rectP2,this._rectP3,this._rectP4])
+            corresAdj = this.similarY(adjacentPoint,[this._rectP1,this._rectP2,this._rectP3,this._rectP4])
         }else{
             dir = 'y'
-            console.log(`P1: ${this._rectP1.x},${this._rectP1.y} P2: ${this._rectP2.x},${this._rectP2.y} P3: ${this._rectP3.x},${this._rectP3.y} P4: ${this._rectP4.x},${this._rectP4.y}`)
-            //the longest side is in the x axis
-            adjacentPoint = this.similarY(nodeFrom,this._rectP2) ? this._rectP2 : this._rectP4
-            //gonna need to move the adjacentPoint and point to the remaining poinhts now the quesiton is which point
-            //corresP1 will be the corresponding point  to p1 with the simlar y coordinate
-            if (this.similarX(nodeFrom,nodeTo)){
-                corresP = nodeTo
-                corresAdj = this._rectP4.x === adjacentPoint.x ? this._rectP2 : this._rectP4
-            }else{
-                corresP = this._rectP4.x === adjacentPoint.x ? this._rectP2 : this._rectP4
-                corresAdj = nodeTo
-            }
-            console.log(`P1: ${this._rectP1.x},${this._rectP1.y} P2: ${this._rectP2.x},${this._rectP2.y} P3: ${this._rectP3.x},${this._rectP3.y} P4: ${this._rectP4.x},${this._rectP4.y}`)
+            adjacentPoint = this.similarY(nodeFrom,[this._rectP1,this._rectP2,this._rectP3,this._rectP4])
+            corresP = this.similarX(nodeFrom,[this._rectP1,this._rectP2,this._rectP3,this._rectP4])
+            corresAdj = this.similarX(adjacentPoint,[this._rectP1,this._rectP2,this._rectP3,this._rectP4])
         }
+        this._rectP1 = nodeFrom
+        this._rectP2 = adjacentPoint
+        this._rectP3 = corresAdj
+        this._rectP4 = corresP
+        this._updateRectPointsDom()
         console.log(`point: ${nodeFrom.x},${nodeFrom.y} adjacent: ${adjacentPoint.x},${adjacentPoint.y} correspondingPoint: ${corresP.x},${corresP.y} corresAdj: ${corresAdj.x},${corresAdj.y}`)
         this.prog(nodeFrom,adjacentPoint,corresP,corresAdj,dir)
     }
@@ -353,32 +339,19 @@ class EdgeProg extends EdgeStack{
         }
         intervalId = setInterval(intervalCb,50)
     }
-    similarX(point1,point2){
-        //point 1 must be p1 or p3 and point 2 must be p2 or p4
-        if (Math.abs(this._node1.getCx() - this._node2.getCx()) <= 20){
-            if (((point1.x+70) === (point2.x-70)) || ((point1.x-70) === (point2.x+70))){
-            return true   
-            }
-        }else{
-            if (point1.x === point2.x){
-                return true
+    similarX(source,points){
+        for(let i =0;i<points.length;i++){
+            if (source.x === points[i].x && source != points[i]){
+                return points[i]
             }
         }
-        return false 
     }
-    similarY(point1,point2){
-        console.log(point1.y,point2.y)
-        //point 1 must be p1 or p3 and point 2 must be p2 or p4
-        if (Math.abs(this._node1.getCy() - this._node2.getCy()) <= 20){
-            if (((point1.y+70) === (point2.y-70)) || ((point1.y-70) === (point2.y+70))){
-             return true   
-            }
-        }else{
-            if (point1.y === point2.y){
-                return true
-            }
+    similarY(source,points){
+       for(let i =0;i<points.length;i++){
+        if (source.y === points[i].y && source != points[i]){
+            return points[i]
         }
-        return false 
+    }
     }
     //=======================================================================================================================================
     coordToCoord(coord1,coord2,dir){
@@ -430,6 +403,7 @@ class EdgeProg extends EdgeStack{
         let curIndexX = 0
         let curMinY = Number.POSITIVE_INFINITY
         let curIndexY = 0
+        console.log(this._rectP1,this._rectP2,this._rectP3,this._rectP4)
         for (let i = 0; i<xCoords.length;i++){
             if (Math.abs(this._rectP1.x - xCoords[i].x) < curMinX){
                 curMinX = Math.abs(this._rectP1.x - xCoords[i].x)
@@ -477,9 +451,11 @@ class EdgeProg extends EdgeStack{
                 this._rectP2.y = this._rectP3.y
                 break
         }
+        console.log(this._rectP1,this._rectP2,this._rectP3,this._rectP4)
     }
     _updateRectPointsDom(){
         //this will update the dom
+
         this._rect.setAttribute("points",`${this._displayPoint(this._rectP1)} ${this._displayPoint(this._rectP2)} ${this._displayPoint(this._rectP3)} ${this._displayPoint(this._rectP4)}`)            
     }
     _initRect(){
