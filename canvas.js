@@ -41,23 +41,33 @@ class Canvas{
         this._svgDefs.removeChild(edge.getDefs())
     }
     progSelected(){
+        //this function will be responsible for starting the progging of a node
+        //the edge progging functionality will be invoked in the node.js object
         if (this._selected.getNumEdges() === 0){
             this._selected.progEast()
         }else{
-            let node2 = this._selected._edge[0].getOppositeNode(this._selected)
+            //this will prog the node towards the direction of the corresponding node of the first edge that was attached to the node
+            let node2 = this._selected._edge[0].getOppositeNode(this._selected)//this will be the corresponding node in the first edge
             let node1X = this._selected.getCx()
             let node1Y = this._selected.getCy()
             let node2X = node2.getCx()
             let node2Y = node2.getCy()
-            // the series of conditionals that follow will check for the correct cardinal position to prog
-            if ((node1X - node2X) > 200){
-                this._selected.progWest()
-            }else if ((node1X - node2X) < -200){
-                this._selected.progEast()
-            }else if (node1Y > node2Y){
-                this._selected.progNorth()
+            //get the maximum distance vertically or horizontally and prog it that way
+            if (Math.abs(node1X-node2X) > Math.abs(node1Y-node2Y)){
+                //need to prog horizontally
+                if (node1X > node2X){
+                    //selected node is to the right of the corresponding node
+                    this._selected.progWest()
+                }else{
+                    this._selected.progEast()
+                }
             }else{
-                this._selected.progSouth()
+                if (node1Y > node2Y){
+                    //selected node is south of corresponding node
+                    this._selected.progNorth()
+                }else{
+                    this._selected.progSouth()
+                }
             }
         }
     }
@@ -79,6 +89,7 @@ class Canvas{
             this._selected.deactivateNode()
         }
         this._selected = node
+        console.log(this._selected)
     }
     deleteCurNode(){
         this._selected = null

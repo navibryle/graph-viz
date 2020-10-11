@@ -216,7 +216,7 @@ class EdgeProg extends EdgeStack{
     _assignPoints(nodeFrom,nodeTo,point){
         //this function will detect if the point is _rectP1 or _rectP3and will assign the corresponding node that is the same as point to nodeFrom
         //and the other point will be assinged to nodeTo
-        if (this.similarX(point,this._rectP1) && this.similarY(point,this._rectP1)){
+        if (this.similarX(point,this._rectP1) || this.similarY(point,this._rectP1)){
             nodeFrom = this._rectP1
             nodeTo = this._rectP3
         }else{
@@ -240,6 +240,7 @@ class EdgeProg extends EdgeStack{
         let output = this._assignPoints(nodeFrom,nodeTo,point)
         nodeFrom = output[0]
         nodeTo = output[1]
+        console.log(nodeFrom,nodeTo)
         // need to account for the deviance
         if (Math.abs(this._rectP1.x - this._rectP3.x) > Math.abs(this._rectP1.y - this._rectP3.y)){
             dir = 'x'
@@ -268,15 +269,15 @@ class EdgeProg extends EdgeStack{
                 corresAdj = nodeTo
             }
         }
-        console.log(`point: ${point.x},${point.y} adjacent: ${adjacentPoint.x},${adjacentPoint.y} correspondingPoint: ${corresP.x},${corresP.y} corresAdj: ${corresAdj.x},${corresP.y}`)
+        console.log(`point: ${nodeFrom.x},${nodeFrom.y} adjacent: ${adjacentPoint.x},${adjacentPoint.y} correspondingPoint: ${corresP.x},${corresP.y} corresAdj: ${corresAdj.x},${corresP.y}`)
         this.prog(nodeFrom,adjacentPoint,corresP,corresAdj,dir)
     }
     prog(point,adjacentPoint,corresP,corresAdj,dir){
         let intervalId
         this._subGrp.setAttribute("clip-path",`url(#edge${this._id})`)
         const intervalCb = () =>{
-            this.coordToCoord(point,corresP,dir)
-            this.coordToCoord(adjacentPoint,corresAdj,dir)
+            this.coordToCoord(point,adjacentPoint,dir)
+            this.coordToCoord(corresP,corresAdj,dir)
             this._rectP1 = point
             this._updateRectPointsDom()
         }

@@ -111,6 +111,7 @@ class SecondNode extends Node{
         this._secondNode.setAttribute("cy",newY)
         this._cx = newX
         this._cy = newY
+        this.updateRectCoords(this._cx-this._radius,this._cy-this._radius)
     }
     //=====================================================
     _createClip(){
