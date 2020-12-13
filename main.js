@@ -74,7 +74,13 @@ function addEdgeEventListener(pointer,canvas,toolbar){
         }
     })
 }
-
+function startDfsEventListener(canvas,graphAlgo){
+    let dfsBtn = document.getElementById("dfs")
+    
+    dfsBtn.addEventListener("click",function(event){
+    graphAlgo.dfs(canvas.getSelectedNode())
+    })
+}
 //============= event listeners end =========
 //============= test ========================
 //need to add a new event listener for adding edges. This new event listener will use the canvas object to track which node is currently active
@@ -88,10 +94,12 @@ function main(){
     var id = new IdGen()
     var canvas = new Canvas("canvas",pointer,"svgDefs")
     var toolbar = new Toolbar(btnIds)
+    var graphAlgo = new GraphAlgo(canvas)
     addNodeEventListener(pointer,toolbar)
     deleteNodeEventListener(pointer,toolbar)
     addEdgeEventListener(pointer,canvas,toolbar)
     canvasNodeEventListener(pointer,id,canvas,toolbar)
     playNodeEventListener(pointer,toolbar,canvas)
+    startDfsEventListener(canvas,graphAlgo)
 }
 main()

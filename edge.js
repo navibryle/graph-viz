@@ -122,6 +122,7 @@ class EdgeStack extends Edge{
 class EdgeProg extends EdgeStack{
     constructor(canvas,pointer,id){
         super(canvas,pointer,id)
+        this._proged = false // this will be true if the edge has already been proged
         this._rect = document.createElementNS("http://www.w3.org/2000/svg","polygon")
         this._clipPath = document.createElementNS("http://www.w3.org/2000/svg","clipPath")
         this._rectP1 = {x:parseInt(this.getX1(),10),y:parseInt(this.getY1(),10)}
@@ -132,6 +133,12 @@ class EdgeProg extends EdgeStack{
     }
     static _appendTo(parent,child){
         parent.appendChild(child)
+    }
+    getProged(){
+        return this._proged
+    }
+    setProged(val){
+        this._proged = val
     }
     _initDefs(){
         this._clipPath.setAttribute("id",`edge${this._id}`)
@@ -275,7 +282,6 @@ class EdgeProg extends EdgeStack{
     _similarPoint(point1,rectPoint){
         let boolX = false
         let boolY = false
-        console.log("similar",point1,rectPoint)
         if (Math.abs(this._node1.getCx() - this._node2.getCx()) <= 20){
             if (point1.x+70 === rectPoint.x || point1.x-70 === rectPoint.x || point1.x-70 === rectPoint.x+70 || point1.x+70 === rectPoint.x-70){
                 boolX = true
@@ -297,7 +303,6 @@ class EdgeProg extends EdgeStack{
         return boolX && boolY
     }
     progFrom(point){
-        //need to change this since the adjacent point can also be P3 now
         let adjacentPoint = null
         let corresP = null// the corresponding point to p1 that has simlar y coord
         let corresAdj = null// the corresponding pint to the adjacent point that has similar y coordinate
@@ -310,7 +315,6 @@ class EdgeProg extends EdgeStack{
         // need to account for the deviance
         if (Math.abs(this._rectP1.x - this._rectP3.x) > Math.abs(this._rectP1.y - this._rectP3.y)){
             dir = 'x'
-            console.log(`P1: ${this._rectP1.x},${this._rectP1.y} P2: ${this._rectP2.x},${this._rectP2.y} P3: ${this._rectP3.x},${this._rectP3.y} P4: ${this._rectP4.x},${this._rectP4.y}`)
             adjacentPoint = this.similarX(nodeFrom,[this._rectP1,this._rectP2,this._rectP3,this._rectP4])
             corresP = this.similarY(nodeFrom,[this._rectP1,this._rectP2,this._rectP3,this._rectP4])
             corresAdj = this.similarY(adjacentPoint,[this._rectP1,this._rectP2,this._rectP3,this._rectP4])
@@ -325,17 +329,22 @@ class EdgeProg extends EdgeStack{
         this._rectP3 = corresAdj
         this._rectP4 = corresP
         this._updateRectPointsDom()
-        console.log(`point: ${nodeFrom.x},${nodeFrom.y} adjacent: ${adjacentPoint.x},${adjacentPoint.y} correspondingPoint: ${corresP.x},${corresP.y} corresAdj: ${corresAdj.x},${corresAdj.y}`)
         this.prog(nodeFrom,adjacentPoint,corresP,corresAdj,dir)
     }
     prog(point,adjacentPoint,corresP,corresAdj,dir){
         let intervalId
         this._subGrp.setAttribute("clip-path",`url(#edge${this._id})`)
         const intervalCb = () =>{
-            this.coordToCoord(point,corresP,dir)
-            this.coordToCoord(adjacentPoint,corresAdj,dir)
-            this._rectP1 = point
-            this._updateRectPointsDom()
+            if (point != corresP){
+                this.coordToCoord(point,corresP,dir)
+                this.coordToCoord(adjacentPoint,corresAdj,dir)
+                this._rectP1 = point
+                this._updateRectPointsDom()
+            }else{
+                this._proged = true
+                clearInterval(intervalId)
+            }
+            
         }
         intervalId = setInterval(intervalCb,50)
     }
@@ -375,6 +384,7 @@ class EdgeProg extends EdgeStack{
     progEdgeFromNode(node){
         let point = node === this._node1 ? this._node1 :this._node2
         this.progFrom(point)
+        
     }
     _displayPoint(point){
         //this will neatly display the point x and y in as a comma seperated integer
@@ -403,7 +413,6 @@ class EdgeProg extends EdgeStack{
         let curIndexX = 0
         let curMinY = Number.POSITIVE_INFINITY
         let curIndexY = 0
-        console.log(this._rectP1,this._rectP2,this._rectP3,this._rectP4)
         for (let i = 0; i<xCoords.length;i++){
             if (Math.abs(this._rectP1.x - xCoords[i].x) < curMinX){
                 curMinX = Math.abs(this._rectP1.x - xCoords[i].x)
@@ -451,7 +460,6 @@ class EdgeProg extends EdgeStack{
                 this._rectP2.y = this._rectP3.y
                 break
         }
-        console.log(this._rectP1,this._rectP2,this._rectP3,this._rectP4)
     }
     _updateRectPointsDom(){
         //this will update the dom

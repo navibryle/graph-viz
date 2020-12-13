@@ -44,7 +44,7 @@ class Canvas{
         //this function will be responsible for starting the progging of a node
         //the edge progging functionality will be invoked in the node.js object
         if (this._selected.getNumEdges() === 0){
-            this._selected.progEast()
+            this._selected.progEast(null,null)
         }else{
             //this will prog the node towards the direction of the corresponding node of the first edge that was attached to the node
             let node2 = this._selected._edge[0].getOppositeNode(this._selected)//this will be the corresponding node in the first edge
@@ -57,17 +57,44 @@ class Canvas{
                 //need to prog horizontally
                 if (node1X > node2X){
                     //selected node is to the right of the corresponding node
-                    this._selected.progWest()
+                    this._selected.progWest(null,null)
                 }else{
-                    this._selected.progEast()
+                    this._selected.progEast(null,null)
                 }
             }else{
                 if (node1Y > node2Y){
                     //selected node is south of corresponding node
-                    this._selected.progNorth()
+                    this._selected.progNorth(null,null)
                 }else{
-                    this._selected.progSouth()
+                    this._selected.progSouth(null,null)
                 }
+            }
+        }
+    }
+    progNode(node,node2){
+        //this function will be responsible for starting the progging of a node
+        //the edge progging functionality will be invoked in the node.js object
+        let quantFlag = "single" // this is a flag to prog only a single edge
+        //this will prog the node towards the direction of the corresponding node of the first edge that was attached to the node
+        let node1X = node.getCx()
+        let node1Y = node.getCy()
+        let node2X = node2.getCx()
+        let node2Y = node2.getCy()
+        //get the maximum distance vertically or horizontally and prog it that way
+        if (Math.abs(node1X-node2X) > Math.abs(node1Y-node2Y)){
+            //need to prog horizontally
+            if (node1X > node2X){
+                //selected node is to the right of the corresponding node
+                node.progWest(quantFlag,node2)
+            }else{
+                node.progEast(quantFlag,node2)
+            }
+        }else{
+            if (node1Y > node2Y){
+                //selected node is south of corresponding node
+                node.progNorth(quantFlag,node2)
+            }else{
+                node.progSouth(quantFlag,node2)
             }
         }
     }

@@ -195,6 +195,9 @@ class NodeEdge extends SecondNode{
     getNumEdges(){
         return this._edgeNum
     }
+    getEdges(){
+        return this._edge
+    }
 }
 class NodeProg extends NodeEdge{
     //will be progging node in cardinal directions
@@ -202,19 +205,24 @@ class NodeProg extends NodeEdge{
         super(x,y,id,canvas,radius,color,addEdgeBtn)
         this._progCard = null // this will be the cardinal postion that the node will prog towards
     }
-    progEast(){
+    progEast(quantFlag,node2){
         //this will make the node seem like its being progresed
         this._progCard = "East"
         this._subGrp.setAttribute("clip-path",`url(#node${this._id})`)
         let intervalId
         let instance = this
+        let constNode2 = node2
         const intervalCb = () =>{
             let x = instance.getRectXCoord()
             let xCoord = parseInt(instance._cx,10)
             if ( x <= (xCoord + parseInt(instance._radius,10))){
                 instance._rect.setAttribute("x",x+1)
                 if (x === xCoord){
-                    instance._startEdgeProg()
+                    if (quantFlag == "single"){
+                        instance._singleEdgeProg(node2)
+                    }else{
+                        instance._startEdgeProg()
+                    }
                 }
             }else{
                 
@@ -223,20 +231,24 @@ class NodeProg extends NodeEdge{
         }
         intervalId = setInterval(intervalCb,50)
     }
-    progWest(){
+    progWest(quantFlag,node2){
         
         this._progCard = "West"
         this._subGrp.setAttribute("clip-path",`url(#node${this._id})`)
         let intervalId
         let instance = this
+        let constNode2 = node2
         const intervalCb = () =>{
             let x = instance.getRectXCoord()
             let xCoord = parseInt(instance._cx,10)
             if ( x >= (xCoord - (3*parseInt(instance._radius,10)))){
                 instance._rect.setAttribute("x",x-1)
                 if (x+2*parseInt(instance._radius,10) === xCoord){
-                    
-                    instance._startEdgeProg()
+                    if (quantFlag == "single"){
+                        instance._singleEdgeProg(node2)
+                    }else{
+                        instance._startEdgeProg()
+                    }
                 }
             }else{
                 
@@ -245,11 +257,12 @@ class NodeProg extends NodeEdge{
         }
         intervalId = setInterval(intervalCb,50)
     }
-    progNorth(){
+    progNorth(quantFlag,node2){
         this._progCard = "North"
         this._subGrp.setAttribute("clip-path",`url(#node${this._id})`)
         let intervalId
         let instance = this
+        let constNode2 = node2
         const intervalCb = () =>{
             let y = instance.getRectYCoord()
             let yCoord = parseInt(instance._cy,10)
@@ -257,7 +270,11 @@ class NodeProg extends NodeEdge{
             if ( y >= ( yCoord - (3*parseInt(instance._radius,10)))){
                 instance._rect.setAttribute("y",y-1)
                 if (y+2*parseInt(instance._radius,10) === yCoord){
-                    instance._startEdgeProg()
+                    if (quantFlag == "single"){
+                        instance._singleEdgeProg(node2)
+                    }else{
+                        instance._startEdgeProg()
+                    }
                 }
             }else{
                 
@@ -266,18 +283,24 @@ class NodeProg extends NodeEdge{
         }
         intervalId = setInterval(intervalCb,50)
     }
-    progSouth(){
+    progSouth(quantFlag,node2){
         this._progCard = "South"
         this._subGrp.setAttribute("clip-path",`url(#node${this._id})`)
         let intervalId
         let instance = this
+        let constNode2 = node2
         const intervalCb = () =>{
             let y = instance.getRectYCoord()
             let yCoord = parseInt(instance._cy,10)
             if ( y <= (yCoord + (parseInt(instance._radius,10)))){
                 instance._rect.setAttribute("y",y+1)
                 if (y === yCoord){
-                    instance._startEdgeProg()
+                    if (quantFlag == "single"){
+                        instance._singleEdgeProg(constNode2)
+                    }else{
+                        instance._startEdgeProg()
+                    }
+                    
                 }
             }else{
                 
@@ -290,6 +313,18 @@ class NodeProg extends NodeEdge{
         let len = this._edge.length
         for (let i = 0;i<len;i++){
             this._edge[i] .progEdgeFromNode(this)
+        }
+    }
+    _singleEdgeProg(node){
+        //prog the specific edge of node
+        let len = this._edge.length
+        for (let i = 0;i<len;i++){
+            
+            if (this._edge[i].getOppositeNode(this) == node){
+                this._edge[i] .progEdgeFromNode(this)
+                break;
+            }
+            
         }
     }
     //============= might not need this at all======================================
