@@ -1,7 +1,7 @@
 class Canvas{
     //this class should represent the canvas
     //this class will collect all the nodes
-    constructor(canvasId,pointer,defsId){
+    constructor(canvasId,pointer,defsId,graphAlgo,idGen){
         //defs will contain the svg definition to be used for clipping
         this._size = 0
         this._nodes = []//the id of each node in this list should be the same as its index. this will only keep track of the first node on the stack
@@ -12,6 +12,8 @@ class Canvas{
         this._edge = null
         this._pointer = pointer
         this._svgDefs = document.getElementById(defsId)
+        this._algo = graphAlgo
+        this._idGen = idGen
     }
     addNode(node){
         //this will add node to the canvas
@@ -43,13 +45,16 @@ class Canvas{
     progSelected(){
         //this function will be responsible for starting the progging of a node
         //the edge progging functionality will be invoked in the node.js object
-        if (this._selected.getNumEdges() === 0){
-            this._selected.progEast(null,null)
+        this.progSingleNode(this._selected)
+    }
+    progSingleNode(node){
+        if (node.getNumEdges() === 0){
+            node.progEast(null,null)
         }else{
             //this will prog the node towards the direction of the corresponding node of the first edge that was attached to the node
-            let node2 = this._selected._edge[0].getOppositeNode(this._selected)//this will be the corresponding node in the first edge
-            let node1X = this._selected.getCx()
-            let node1Y = this._selected.getCy()
+            let node2 = node._edge[0].getOppositeNode(node)//this will be the corresponding node in the first edge
+            let node1X = node.getCx()
+            let node1Y = node.getCy()
             let node2X = node2.getCx()
             let node2Y = node2.getCy()
             //get the maximum distance vertically or horizontally and prog it that way
@@ -57,16 +62,16 @@ class Canvas{
                 //need to prog horizontally
                 if (node1X > node2X){
                     //selected node is to the right of the corresponding node
-                    this._selected.progWest(null,null)
+                    node.progWest(null,null)
                 }else{
-                    this._selected.progEast(null,null)
+                    node.progEast(null,null)
                 }
             }else{
                 if (node1Y > node2Y){
                     //selected node is south of corresponding node
-                    this._selected.progNorth(null,null)
+                    node.progNorth(null,null)
                 }else{
-                    this._selected.progSouth(null,null)
+                    node.progSouth(null,null)
                 }
             }
         }
@@ -116,7 +121,6 @@ class Canvas{
             this._selected.deactivateNode()
         }
         this._selected = node
-        console.log(this._selected)
     }
     deleteCurNode(){
         this._selected = null
@@ -141,6 +145,12 @@ class Canvas{
     getActiveEdge(){
         return this._edge
     }
+    execute(){
+        if (this._algo.getSize() != 0){
+            let path = this._algo.getNextEdge()
+            this.progNode(path[0],path[1])
+        }
+    }
     addEventListener(){
         //need to create an svg and have its one end on the center of the node and the other end tracing the pointer
         //i will write an event listener to change the x2 and y2 components of the line and update it on every mousemove
@@ -160,5 +170,120 @@ class Canvas{
                 instance._edge.updateNode2Endpoint(event.clientX,event.clientY-toolbarHeight)
             }
         })
+    }
+    random(){
+        //create 5-10 nodes and 3-5 edges anywhere in the screen
+        //each node will have a margin when randomized 
+        const WIDTH_MIN = window.innerWidth*0.1
+        const WIDTH_MAX = window.innerWidth*0.9
+        const HEIGHT_MIN = (window.innerHeight - this.getCanvas().getBoundingClientRect().top)*0.1
+        const HEIGHT_MAX = (window.innerHeight - this.getCanvas().getBoundingClientRect().top)*0.9
+        const VERTICAL_OFFSET = (window.innerHeight - this.getCanvas().getBoundingClientRect().top)*0.2
+        const HORIZONTAL_OFFSET = window.innerWidth*0.2
+        const NODES = 10 // this is the number of nodes to generate
+        let nodeRectangles = [] // this will be a collection of NodeRectangle objects that do not intersect with each other
+        for (var i = 0; i < NODES; i++){
+            //this will fill up the canvas with at most 10 nodes and at least 1 node placed randomly
+            this.getRandomCoord({max:WIDTH_MAX,min:WIDTH_MIN},{max:HEIGHT_MAX,min:HEIGHT_MIN},nodeRectangles,{horizontal:HORIZONTAL_OFFSET,verical:VERTICAL_OFFSET})
+        }
+        this.createRandomEdges(nodeRectangles)
+    }
+    createRandomEdges(nodeRectangles){
+        let edgeProb = 0.8 // this wil be the initial probability of an edge being created given that it doesnt intercept with any other edges
+        let len = nodeRectangles.length
+        let curProb = null // this will be used to decide wether an edge is drawn or not
+        let intercept = false // this will be a flag to check if a node intersects the line
+        for (var i = 0; i < len; i++){
+            let node1 = nodeRectangles[i].getNode()
+            for (var j = 0; j< len;j++){
+                if (i != j){
+                    let node2 = nodeRectangles[j].getNode()
+                    let slopeIntercept = this.getSlopeIntercept(node1,node2)
+                    for (var k = 0;k <len; k++){
+                        if (k != i && k != j){
+                            let node3 = nodeRectangles[k].getNode()
+                            if (this.checkIntercept(slopeIntercept,node3,{min:node1.getCx() < node2.getCx()?node1.getCx():node2.getCx(),max:node1.getCx() < node2.getCx()?node2.getCx():node1.getCx()})){
+                                intercept = true
+                                break
+                            }
+                        }
+                    }
+                    curProb = Math.random()
+                    if (curProb <= edgeProb && !intercept){
+                        let temp = this._selected
+                        this._selected = node1
+                        let newEdge = new EdgeGraph(this,this._pointer,this._idGen.getIdIncrement())
+                        this._selected = temp
+                        newEdge.setSecondNode(node2)
+                        node1.addEdge(newEdge)
+                        node2.addEdge(newEdge)
+                        this.addEdge(newEdge)
+                        edgeProb = (edgeProb - 0.1) < 0 ? 0:edgeProb - 0.1
+                    }
+                    intercept = false
+                }
+            }
+
+        }
+    }
+    checkIntercept(slopeIntercept,node,interval){
+        //this will check if node intersects with the line that is given by slopeIntercept
+        let point = {x:node.getCx(),y:node.getCy()}
+        let lineVal = (point.x*slopeIntercept.m) + slopeIntercept.b
+        if (point.x >= interval.min && point.x <= interval.max && Math.abs(point.y - lineVal) < node.getRadius()){
+            return true
+        }
+        return false
+    }
+    getSlopeIntercept(node1,node2){
+        //node1 and node 2 will be a GraphNode object
+        let point1 = {x:node1.getCx(),y:node1.getCy()}
+        let point2 = {x:node2.getCx(),y:node2.getCy()}
+        let slope = (point2.y - point1.y)/(point2.x-point1.x)
+        return {m:slope,b:point2.y-(slope*point2.x)}
+    }
+    getRandomCoord(width,height,rectangles,offset){
+        let randx = (Math.random()*(width.max-width.min)) + width.min
+        let randy = (Math.random()*(height.max-height.min)) + height.min
+        this.randomize(width,height,randx,randy)
+        let flag = true
+        setTimeout(function(){
+            flag = false
+        },5000)//this will stop the search for a random node that does not intersect with any rectangles in 5 seconds
+        let newGraphNode = new GraphNode(randx,randy,this._idGen.getIdIncrement(),this,15,"blue","addEdge")
+        newGraphNode.nodeEventListenerPointer(this._pointer)
+        let newNode = new NodeRect (newGraphNode,offset)
+        let len = rectangles.length
+        if (len === 0){
+            rectangles.push(newNode)
+            this.addNode(newNode.getNode())
+            return true
+        }else{
+            while (flag){
+                let newGraphNode = new GraphNode(randx,randy,this._idGen.getIdIncrement(),this,15,"blue","addEdge")
+                newGraphNode.nodeEventListenerPointer(this._pointer)
+                newNode = new NodeRect (newGraphNode,offset)
+                let intersected = false
+                for (let i = 0; i < len;i++){
+                    if (rectangles[i].intersects(newNode)){
+                        this.randomize(width,height,randx,randy)
+                        intersected = true
+                        break
+                    }
+                }
+                if (intersected){
+                    break
+                }
+                rectangles.push(newNode)
+                this.addNode(newNode.getNode())
+                return true
+            }
+        }
+        return false        
+    }
+    randomize(width,height,randx,randy){
+        //this will create new random values for randx and randy
+        randx = (Math.random()*(width.max-width.min)) + width.min
+        randy = (Math.random()*(height.max-height.min)) + height.min
     }
 }

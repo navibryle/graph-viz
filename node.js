@@ -204,6 +204,36 @@ class NodeProg extends NodeEdge{
     constructor (x,y,id,canvas,radius,color,addEdgeBtn){
         super(x,y,id,canvas,radius,color,addEdgeBtn)
         this._progCard = null // this will be the cardinal postion that the node will prog towards
+        this._proged = false // this will be a boolean value to indicate if the node has been proged or not
+    }
+    isProged(){
+        return this._proged
+    }
+    setProged(status){
+        this._proged = status
+    }
+    targetProg(targetNode,sourceNode){
+        let node1X = targetNode.getCx()
+        let node1Y = targetNode.getCy()
+        let node2X = sourceNode.getCx()
+        let node2Y = sourceNode.getCy()
+        //get the maximum distance vertically or horizontally and prog it that way
+        if (Math.abs(node1X-node2X) > Math.abs(node1Y-node2Y)){
+            //need to prog horizontally
+            if (node1X > node2X){
+                //selected node is to the right of the corresponding node
+                targetNode.progEast(null,null)
+            }else{
+                targetNode.progWest(null,null)
+            }
+        }else{
+            if (node1Y > node2Y){
+                //selected node is south of corresponding node
+                targetNode.progSouth(null,null)
+            }else{
+                targetNode.progNorth(null,null)
+            }
+        }
     }
     progEast(quantFlag,node2){
         //this will make the node seem like its being progresed
@@ -212,24 +242,33 @@ class NodeProg extends NodeEdge{
         let intervalId
         let instance = this
         let constNode2 = node2
-        const intervalCb = () =>{
-            let x = instance.getRectXCoord()
-            let xCoord = parseInt(instance._cx,10)
-            if ( x <= (xCoord + parseInt(instance._radius,10))){
-                instance._rect.setAttribute("x",x+1)
-                if (x === xCoord){
-                    if (quantFlag == "single"){
-                        instance._singleEdgeProg(node2)
-                    }else{
-                        instance._startEdgeProg()
+        if (this._proged === false){
+            this._proged = true
+            const intervalCb = () =>{
+                let x = instance.getRectXCoord()
+                let xCoord = parseInt(instance._cx,10)
+                if ( x <= (xCoord + parseInt(instance._radius,10))){
+                    instance._rect.setAttribute("x",x+1)
+                    if (x === xCoord){
+                        if (quantFlag == "single"){
+                            instance._singleEdgeProg(node2)
+                        }else{
+                            instance._startEdgeProg()
+                        }
                     }
+                }else{
+                    this._proged = true
+                    clearInterval(intervalId)
                 }
+            }
+            intervalId = setInterval(intervalCb,20)
+        }else{
+            if (quantFlag == "single"){
+                instance._singleEdgeProg(constNode2)
             }else{
-                
-                clearInterval(intervalId)
+                instance._startEdgeProg()
             }
         }
-        intervalId = setInterval(intervalCb,50)
     }
     progWest(quantFlag,node2){
         
@@ -238,24 +277,33 @@ class NodeProg extends NodeEdge{
         let intervalId
         let instance = this
         let constNode2 = node2
-        const intervalCb = () =>{
-            let x = instance.getRectXCoord()
-            let xCoord = parseInt(instance._cx,10)
-            if ( x >= (xCoord - (3*parseInt(instance._radius,10)))){
-                instance._rect.setAttribute("x",x-1)
-                if (x+2*parseInt(instance._radius,10) === xCoord){
-                    if (quantFlag == "single"){
-                        instance._singleEdgeProg(node2)
-                    }else{
-                        instance._startEdgeProg()
+        if (this._proged === false){
+            this._proged = true
+            const intervalCb = () =>{
+                let x = instance.getRectXCoord()
+                let xCoord = parseInt(instance._cx,10)
+                if ( x >= (xCoord - (3*parseInt(instance._radius,10)))){
+                    instance._rect.setAttribute("x",x-1)
+                    if (x+2*parseInt(instance._radius,10) === xCoord){
+                        if (quantFlag == "single"){
+                            instance._singleEdgeProg(node2)
+                        }else{
+                            instance._startEdgeProg()
+                        }
                     }
+                }else{
+                    this._proged = true
+                    clearInterval(intervalId)
                 }
+            }
+            intervalId = setInterval(intervalCb,20)
+        }else{
+            if (quantFlag == "single"){
+                instance._singleEdgeProg(constNode2)
             }else{
-                
-                clearInterval(intervalId)
+                instance._startEdgeProg()
             }
         }
-        intervalId = setInterval(intervalCb,50)
     }
     progNorth(quantFlag,node2){
         this._progCard = "North"
@@ -263,25 +311,34 @@ class NodeProg extends NodeEdge{
         let intervalId
         let instance = this
         let constNode2 = node2
-        const intervalCb = () =>{
-            let y = instance.getRectYCoord()
-            let yCoord = parseInt(instance._cy,10)
-            
-            if ( y >= ( yCoord - (3*parseInt(instance._radius,10)))){
-                instance._rect.setAttribute("y",y-1)
-                if (y+2*parseInt(instance._radius,10) === yCoord){
-                    if (quantFlag == "single"){
-                        instance._singleEdgeProg(node2)
-                    }else{
-                        instance._startEdgeProg()
+        if (this._proged === false){
+            this._proged = true
+            const intervalCb = () =>{
+                let y = instance.getRectYCoord()
+                let yCoord = parseInt(instance._cy,10)
+                if ( y >= ( yCoord - (3*parseInt(instance._radius,10)))){
+                    instance._rect.setAttribute("y",y-1)
+                    if (y+2*parseInt(instance._radius,10) === yCoord){
+                        if (quantFlag == "single"){
+                            instance._singleEdgeProg(node2)
+                        }else{
+                            instance._startEdgeProg()
+                        }
                     }
+                }else{
+                    this._proged = true
+                    
+                    clearInterval(intervalId)
                 }
+            }
+            intervalId = setInterval(intervalCb,20)
+        }else{
+            if (quantFlag == "single"){
+                instance._singleEdgeProg(constNode2)
             }else{
-                
-                clearInterval(intervalId)
+                instance._startEdgeProg()
             }
         }
-        intervalId = setInterval(intervalCb,50)
     }
     progSouth(quantFlag,node2){
         this._progCard = "South"
@@ -289,30 +346,43 @@ class NodeProg extends NodeEdge{
         let intervalId
         let instance = this
         let constNode2 = node2
-        const intervalCb = () =>{
-            let y = instance.getRectYCoord()
-            let yCoord = parseInt(instance._cy,10)
-            if ( y <= (yCoord + (parseInt(instance._radius,10)))){
-                instance._rect.setAttribute("y",y+1)
-                if (y === yCoord){
-                    if (quantFlag == "single"){
-                        instance._singleEdgeProg(constNode2)
-                    }else{
-                        instance._startEdgeProg()
+        if (this._proged === false){
+            this._proged = true
+            const intervalCb = () =>{
+                let y = instance.getRectYCoord()
+                let yCoord = parseInt(instance._cy,10)
+                if ( y <= (yCoord + (parseInt(instance._radius,10)))){
+                    instance._rect.setAttribute("y",y+1)
+                    if (y === yCoord){
+                        if (quantFlag == "single"){
+                            instance._singleEdgeProg(constNode2)
+                        }else{
+                            instance._startEdgeProg()
+                        }
+                        
                     }
-                    
+                }else{
+                    this._proged = true
+                    clearInterval(intervalId)
                 }
+            }
+            intervalId = setInterval(intervalCb,20)
+        }else{
+            if (quantFlag == "single"){
+                instance._singleEdgeProg(constNode2)
             }else{
-                
-                clearInterval(intervalId)
+                instance._startEdgeProg()
             }
         }
-        intervalId = setInterval(intervalCb,50)
+        
     }
     _startEdgeProg(){
         let len = this._edge.length
         for (let i = 0;i<len;i++){
-            this._edge[i] .progEdgeFromNode(this)
+            if (!this._edge[i].getProged()){
+                this._edge[i].progEdgeFromNode(this)
+            }
+            
         }
     }
     _singleEdgeProg(node){
@@ -326,6 +396,15 @@ class NodeProg extends NodeEdge{
             }
             
         }
+    }
+    hasProgableEdges(){
+        let edges = this.getEdges()
+        for (let i = 0; i< edges.length; i++){
+            if (!edges[i].getProged()){
+                return true
+            }
+        }
+        return false
     }
     //============= might not need this at all======================================
     isHalfWay(){

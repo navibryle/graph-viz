@@ -1,41 +1,50 @@
 class GraphAlgo{
-    constructor(canvas){
-        this.canvas = canvas
+    constructor(){
+        this._queue = new Queue()
     }
     dfs(startingNode){
         let frontier = []
-        let init = 0 //this is just to make sure the while loop executes the first iteration.
         let curNode = startingNode
-        let edges
-        let lenEdges
+        let edges = startingNode.getEdges()
+        this.addToFrontier(curNode,edges,frontier)
         let prog
-        
-        while ((frontier != undefined && frontier.length != 0) || init != null){
-            
-            
-            
-            if (frontier != undefined && frontier.length != 0){
-                console.log(frontier)
-                prog = frontier.pop()
-                console.log(frontier)
-                console.log("PROGED NEW NODE")
-                prog[1].setProged(true)
-                this.canvas.progNode(prog[0],prog[1].getOppositeNode(prog[0]))
-                
-                curNode = prog[1].getOppositeNode(prog[0])
-            }
-            
+        while(frontier != undefined && frontier.length != 0){
+            prog = frontier.pop()
+            curNode = prog[1].getOppositeNode(prog[0])
+            prog[1].setProged(true)
+            this._queue.enqueue([prog[0],prog[1].getOppositeNode(prog[0]),prog[1]])
             edges = curNode.getEdges()
-            lenEdges = edges.length
+            this.addToFrontier(curNode,edges,frontier)
+        }
+    }
+    addToFrontier(curNode,edges,frontier){
+        let lenEdges = edges.length
             for (let i = 0; i < lenEdges; i++){
-                console.log("REEEEEEEEEE")
                 if (edges[i].getProged() == false){
-                    console.log("ADDED NEW EDGE")
                     frontier.push([curNode,edges[i]])
                 }
             }
-            
-            init = null
+    }
+    getSize(){
+        return this._queue.getSize()
+    }
+    getNextEdge(){
+        return this._queue.dequeue()
+    }
+    bfs(startingNode){
+        let frontier = []
+        let curNode = startingNode
+        let edges = startingNode.getEdges()
+        this.addToFrontier(curNode,edges,frontier)
+        let prog
+        while(frontier != undefined && frontier.length != 0){
+            prog = frontier[0]
+            frontier.shift()
+            curNode = prog[1].getOppositeNode(prog[0])
+            prog[1].setProged(true)
+            this._queue.enqueue([prog[0],prog[1].getOppositeNode(prog[0]),prog[1]])
+            edges = curNode.getEdges()
+            this.addToFrontier(curNode,edges,frontier)
         }
     }
 }

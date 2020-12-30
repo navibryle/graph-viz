@@ -11,6 +11,8 @@
         <script src = "toolbar.js" type="application/javascript" defer></script>
         <script src = "edge.js" type="application/javascript" defer></script>
         <script src = "graphAlgo.js" type="application/javascript" defer></script>
+        <script src = "queue.js" type="application/javascript" defer></script>
+        <script src = "nodeRectangle.js" type="application/javascript" defer></script>
         <script src = "main.js" type="application/javascript" defer></script>
     </head>
     <body>
@@ -29,11 +31,15 @@
                     </button>
                     <button id = "removeNode" class = "genericBtn idle">
                         <div class = "fas fa-ban"></div>
-                        <div>remove</div>
+                        <div>Remove</div>
                     </button>
                     <button id = "randomNode" class = "genericBtn idle">
                         <div class = "fas fa-dice"></div>
-                        <div>random</div>
+                        <div>Random</div>
+                    </button>
+                    <button id = "clear" class = "genericBtn idle">
+                        <div class = "fas fa-trash"></div>
+                        <div>Clear</div>
                     </button>
                     <button id = "addEdge" class = "genericBtn nodeBtn hide">
                         <div class = "fas fa-slash"></div>
@@ -47,6 +53,11 @@
                         <div class = "fas fa-play"></div>
                         <div>DFS</div>
                     </button>
+                    <button id = "bfs" class = "genericBtn idle">
+                        <div class = "fas fa-play"></div>
+                        <div>BFS</div>
+                    </button>
+                   
                 </div>
                 <svg id = "canvas" >
                     <defs id = "svgDefs"></defs>

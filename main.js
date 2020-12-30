@@ -79,6 +79,21 @@ function startDfsEventListener(canvas,graphAlgo){
     
     dfsBtn.addEventListener("click",function(event){
     graphAlgo.dfs(canvas.getSelectedNode())
+    canvas.execute()
+    })
+}
+function startBfsEventListener(canvas,graphAlgo){
+    let dfsBtn = document.getElementById("bfs")
+    
+    dfsBtn.addEventListener("click",function(event){
+    graphAlgo.bfs(canvas.getSelectedNode())
+    canvas.execute()
+    })
+}
+function randomListener(canvas){
+    let randomBtn = document.getElementById("randomNode")
+    randomBtn.addEventListener("click",function(event){
+        canvas.random()
     })
 }
 //============= event listeners end =========
@@ -92,14 +107,18 @@ function main(){
     var btnIds = ["addNode","removeNode","randomNode","addEdge"]
     var pointer = new Pointer(addNodeSvg,delNodeSvg,"canvas","erase-cursor","toolbar")
     var id = new IdGen()
-    var canvas = new Canvas("canvas",pointer,"svgDefs")
-    var toolbar = new Toolbar(btnIds)
+    var canvas
     var graphAlgo = new GraphAlgo(canvas)
+    canvas = new Canvas("canvas",pointer,"svgDefs",graphAlgo,id)
+    var toolbar = new Toolbar(btnIds)
+    
     addNodeEventListener(pointer,toolbar)
     deleteNodeEventListener(pointer,toolbar)
     addEdgeEventListener(pointer,canvas,toolbar)
     canvasNodeEventListener(pointer,id,canvas,toolbar)
     playNodeEventListener(pointer,toolbar,canvas)
+    randomListener(canvas)
     startDfsEventListener(canvas,graphAlgo)
+    startBfsEventListener(canvas,graphAlgo)
 }
 main()

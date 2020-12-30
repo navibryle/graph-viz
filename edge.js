@@ -303,6 +303,9 @@ class EdgeProg extends EdgeStack{
         return boolX && boolY
     }
     progFrom(point){
+        console.log("REEEEEEEEe")
+        this._node1.deactivateNode()
+        this._node2.deactivateNode()
         let adjacentPoint = null
         let corresP = null// the corresponding point to p1 that has simlar y coord
         let corresAdj = null// the corresponding pint to the adjacent point that has similar y coordinate
@@ -329,24 +332,28 @@ class EdgeProg extends EdgeStack{
         this._rectP3 = corresAdj
         this._rectP4 = corresP
         this._updateRectPointsDom()
-        this.prog(nodeFrom,adjacentPoint,corresP,corresAdj,dir)
+        this.prog(nodeFrom,adjacentPoint,corresP,corresAdj,dir,this.getOppositeNode(point))
     }
-    prog(point,adjacentPoint,corresP,corresAdj,dir){
+    prog(point,adjacentPoint,corresP,corresAdj,dir,targetNode){
         let intervalId
         this._subGrp.setAttribute("clip-path",`url(#edge${this._id})`)
+       
         const intervalCb = () =>{
-            if (point != corresP){
+            if (point.x != corresP.x || point.y != corresP.y){
                 this.coordToCoord(point,corresP,dir)
                 this.coordToCoord(adjacentPoint,corresAdj,dir)
                 this._rectP1 = point
                 this._updateRectPointsDom()
             }else{
-                this._proged = true
                 clearInterval(intervalId)
+                if (!targetNode.isProged()){
+                    targetNode.targetProg(targetNode,this.getOppositeNode(targetNode))
+                }
+                this._canvas.execute() //this will execute the next prog to be done in the execute callback
             }
             
         }
-        intervalId = setInterval(intervalCb,50)
+        intervalId = setInterval(intervalCb,20)
     }
     similarX(source,points){
         for(let i =0;i<points.length;i++){
