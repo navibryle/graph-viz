@@ -70,6 +70,10 @@ body{
     pointer-events: none;
 }
 /*==========node===========*/
+.node-unclickable{
+    pointer-events: none;
+    cursor:default;
+}
 .node{
     cursor: grab;
 }

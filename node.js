@@ -434,6 +434,14 @@ class GraphNode extends NodeProg{
             instance._canBeClicked = false
         },100)
     }
+    setUnclickable(){
+        this._firstNode.setAttribute("class","node node-unclickable")
+        this._secondNode.setAttribute("class","node node-unclickable")
+    }
+    setClickable(){
+        this._firstNode.setAttribute("class","node")
+        this._secondNode.setAttribute("class","node")
+    }
     nodeEventListenerPointer(pointer){
         var node = this._firstNode
         var instance = this

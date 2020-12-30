@@ -23,13 +23,6 @@ function deleteNodeEventListener(pointer,toolbar){
         }
     })
 }
-function playNodeEventListener(pointer,toolbar,canvas){
-    let playBtn = document.getElementById("playNode")
-    playBtn.addEventListener("click",function(){
-        toolbar.setActive("playNode")
-        canvas.progSelected()
-    })
-}
 function canvasNodeEventListener(pointer,id,canvas,toolbar){
     /*
     cases:
@@ -96,6 +89,12 @@ function randomListener(canvas){
         canvas.random()
     })
 }
+function clearCanvasListener(canvas){
+    let clearBtn = document.getElementById("clear")
+    clearBtn.addEventListener("click",function(){
+        canvas.clear()
+    })
+}
 //============= event listeners end =========
 //============= test ========================
 //need to add a new event listener for adding edges. This new event listener will use the canvas object to track which node is currently active
@@ -116,9 +115,9 @@ function main(){
     deleteNodeEventListener(pointer,toolbar)
     addEdgeEventListener(pointer,canvas,toolbar)
     canvasNodeEventListener(pointer,id,canvas,toolbar)
-    playNodeEventListener(pointer,toolbar,canvas)
     randomListener(canvas)
     startDfsEventListener(canvas,graphAlgo)
     startBfsEventListener(canvas,graphAlgo)
+    clearCanvasListener(canvas)
 }
 main()

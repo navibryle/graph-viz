@@ -303,9 +303,8 @@ class EdgeProg extends EdgeStack{
         return boolX && boolY
     }
     progFrom(point){
-        console.log("REEEEEEEEe")
-        this._node1.deactivateNode()
-        this._node2.deactivateNode()
+        this._node1.setUnclickable()
+        this._node2.setUnclickable()
         let adjacentPoint = null
         let corresP = null// the corresponding point to p1 that has simlar y coord
         let corresAdj = null// the corresponding pint to the adjacent point that has similar y coordinate

@@ -286,4 +286,11 @@ class Canvas{
         randx = (Math.random()*(width.max-width.min)) + width.min
         randy = (Math.random()*(height.max-height.min)) + height.min
     }
+    clear(){
+        this._canvas.innerHTML = ""
+        this._canvas.appendChild(this._svgDefs)
+    }
+    createPreset(){
+        
+    }
 }
