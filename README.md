@@ -1,4 +1,16 @@
-This will be a data visualizer that will visualize the excecution of graph
-algorithms.
+# Graph algorithm simulator
 
-idea for async progging: Create a queue that will execute all actions and just execute each event in the queue asynchronously by dynamically chaining promises.
+This will aim to visualize the execution of some graph algorithms from graphs that are either created customly or randomly generated.
+
+
+## Creating graphs
+- Graphs can be created by adding nodes and selecting them to add edges. If a node is erased all the edges connected to it will be erased. 
+  * ![](doc/create.gif)
+- Graphs can be created by using a random graph generator. Simply click the random button. Any graph that is displayed in the screen can be deleted by pressing clear.  
+  * ![](doc/random.gif)
+## Traversing Graphs
+As of now there are only two algorithms implemented DFS(depth-first search) and BFS(breadth-first search)
+- DFS example 
+  * ![](doc/dfs.gif)
+- BFS example  
+  * ![](doc/bfs.gif)
