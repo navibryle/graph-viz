@@ -148,6 +148,7 @@ class Canvas{
     execute(){
         if (this._algo.getSize() != 0){
             let path = this._algo.getNextEdge()
+
             this.progNode(path[0],path[1])
         }
     }
@@ -180,7 +181,7 @@ class Canvas{
         const HEIGHT_MAX = (window.innerHeight - this.getCanvas().getBoundingClientRect().top)*0.9
         const VERTICAL_OFFSET = (window.innerHeight - this.getCanvas().getBoundingClientRect().top)*0.2
         const HORIZONTAL_OFFSET = window.innerWidth*0.2
-        const NODES = 10 // this is the number of nodes to generate
+        const NODES = 6 // this is the number of nodes to generate
         let nodeRectangles = [] // this will be a collection of NodeRectangle objects that do not intersect with each other
         for (var i = 0; i < NODES; i++){
             //this will fill up the canvas with at most 10 nodes and at least 1 node placed randomly
@@ -214,8 +215,9 @@ class Canvas{
                         this._selected = node1
                         let newEdge = new EdgeGraph(this,this._pointer,this._idGen.getIdIncrement())
                         this._selected = temp
-                        newEdge.setSecondNode(node2)
                         node1.addEdge(newEdge)
+                        newEdge.setFirstNode(node1)
+                        newEdge.setSecondNode(node2)
                         node2.addEdge(newEdge)
                         this.addEdge(newEdge)
                         edgeProb = (edgeProb - 0.1) < 0 ? 0:edgeProb - 0.1

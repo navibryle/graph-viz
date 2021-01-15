@@ -303,6 +303,7 @@ class EdgeProg extends EdgeStack{
         return boolX && boolY
     }
     progFrom(point){
+        this._lineUp()
         this._node1.setUnclickable()
         this._node2.setUnclickable()
         let adjacentPoint = null
@@ -315,6 +316,7 @@ class EdgeProg extends EdgeStack{
         nodeFrom = output[0]
         nodeTo = output[1]
         // need to account for the deviance
+        
         if (Math.abs(this._rectP1.x - this._rectP3.x) > Math.abs(this._rectP1.y - this._rectP3.y)){
             dir = 'x'
             adjacentPoint = this.similarX(nodeFrom,[this._rectP1,this._rectP2,this._rectP3,this._rectP4])
@@ -357,6 +359,7 @@ class EdgeProg extends EdgeStack{
     similarX(source,points){
         for(let i =0;i<points.length;i++){
             if (source.x === points[i].x && source != points[i]){
+
                 return points[i]
             }
         }
@@ -365,8 +368,9 @@ class EdgeProg extends EdgeStack{
        for(let i =0;i<points.length;i++){
         if (source.y === points[i].y && source != points[i]){
             return points[i]
+            }
+        
         }
-    }
     }
     //=======================================================================================================================================
     coordToCoord(coord1,coord2,dir){
