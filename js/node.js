@@ -261,7 +261,7 @@ class NodeProg extends NodeEdge{
                     clearInterval(intervalId)
                 }
             }
-            intervalId = setInterval(intervalCb,20)
+            intervalId = setInterval(intervalCb,14)
         }else{
             if (quantFlag == "single"){
                 instance._singleEdgeProg(constNode2)
@@ -296,7 +296,7 @@ class NodeProg extends NodeEdge{
                     clearInterval(intervalId)
                 }
             }
-            intervalId = setInterval(intervalCb,20)
+            intervalId = setInterval(intervalCb,14)
         }else{
             if (quantFlag == "single"){
                 instance._singleEdgeProg(constNode2)
@@ -331,7 +331,7 @@ class NodeProg extends NodeEdge{
                     clearInterval(intervalId)
                 }
             }
-            intervalId = setInterval(intervalCb,20)
+            intervalId = setInterval(intervalCb,14)
         }else{
             if (quantFlag == "single"){
                 instance._singleEdgeProg(constNode2)
@@ -366,7 +366,7 @@ class NodeProg extends NodeEdge{
                     clearInterval(intervalId)
                 }
             }
-            intervalId = setInterval(intervalCb,20)
+            intervalId = setInterval(intervalCb,14)
         }else{
             if (quantFlag == "single"){
                 instance._singleEdgeProg(constNode2)

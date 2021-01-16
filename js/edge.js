@@ -354,7 +354,7 @@ class EdgeProg extends EdgeStack{
             }
             
         }
-        intervalId = setInterval(intervalCb,20)
+        intervalId = setInterval(intervalCb,14)
     }
     similarX(source,points){
         for(let i =0;i<points.length;i++){
